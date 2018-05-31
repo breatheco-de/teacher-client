@@ -12,10 +12,15 @@ $ git clone <repo_url>
 ```sh
 $ npm install
 ```
-3. Create your **.env** file and setup the envirnoment variables
+3. Create your **.env.dev** and file and setup the envirnoment variables
 ```js
 // .env
 
-//The wordpress host
-WP_HOST=127.0.0.1
+STATIC_PATH=
+
+ENVIRONMENT=development
+CMS_URL=https://breatheco.de
+API_URL=https://talenttree-alesanchezr.c9users.io
+ASSETS_URL=https://assets-alesanchezr.c9users.io/apis
+REPLIT_URL=https://assets.breatheco.de/apps/replit?r=
 ```
