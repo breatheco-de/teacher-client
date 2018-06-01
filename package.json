@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "c9": "webpack-dev-server --mode development --open --host $IP --port $PORT --config webpack.dev.js",
+    "dev-server": "webpack-dev-server --mode development --config webpack.dev.js",    
     "dev": "webpack --mode development --config webpack.dev.js",
     "start": "http-server -a $IP",
     "build": "webpack --mode development --config webpack.prod.js"
