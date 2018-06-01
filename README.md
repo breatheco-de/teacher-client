@@ -12,7 +12,7 @@ $ git clone <repo_url>
 ```sh
 $ npm install
 ```
-3. clone this repot inside your /src/js/utils folder:
+3. clone this two repositories inside the /src/js/utils folder:
 ```
 $ cd /src/js/utils
 $ git clone https://github.com/breatheco-de/react-components
