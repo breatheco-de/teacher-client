@@ -12,6 +12,13 @@ $ git clone <repo_url>
 ```sh
 $ npm install
 ```
+3. clone this repot inside your /src/js/utils folder:
+```
+$ cd /src/js/utils
+$ git clone https://github.com/breatheco-de/react-components
+$ git clone https://github.com/breatheco-de/api-javascript-wrapper.git
+```
+
 3. Create your **.env.dev** and file and setup the envirnoment variables
 ```js
 // .env
