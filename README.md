@@ -16,7 +16,9 @@ $ npm install
 ```
 $ cd /src/js/utils
 $ git clone https://github.com/breatheco-de/react-components
+$ mv react-components/ bc-components/
 $ git clone https://github.com/breatheco-de/api-javascript-wrapper.git
+$ mv api-javascript-wrapper/ api/
 ```
 
 3. Create your **.env.dev** and file and setup the envirnoment variables
