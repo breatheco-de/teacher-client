@@ -3,6 +3,7 @@
 
 # track this file .gitignore (i.e. do NOT ignore it)
 !.gitignore
+!.github
 php_errorlog
 .log
 
@@ -52,13 +53,12 @@ Thumbs.db
 node_modules/
 
 # ignore the dist directory were our bundle files are going to be
-dist/
+public/*
+!public/index.html
 
-# ignore the testing server
-server.js
-
-#ignore the index on the root
-!index.html
+dist/*
+!dist/index.html
 
 !.gitkeep
 !.htaccess
+!.eslintrc
