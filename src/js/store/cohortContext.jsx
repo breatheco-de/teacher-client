@@ -1,7 +1,7 @@
 import React from "react";
 import BC from "../utils/api.js";
 import { Session } from "bc-react-session";
-
+import { Notify } from "bc-react-notifier";
 export const Context = React.createContext(null);
 const getState = ({ getStore, setStore }) => {
 	return {
@@ -10,7 +10,23 @@ const getState = ({ getStore, setStore }) => {
 			students: []
 		},
 		actions: {
-			getSyllabus: slug => {}
+			saveCohortAttendancy: (cohortSlug, attendancy) => {
+				const { students } = getStore();
+				BC.activity()
+					.addBulk(
+						students.map(stud => {
+							const attended = attendancy.find(a => a.id === stud.id);
+							return {
+								id: stud.id,
+								email: stud.email,
+								slug: typeof attended === "undefined" || !attended ? "classroom_unattendance" : "classroom_attendance",
+								data: `{ "cohort": "${cohortSlug}"}`
+							};
+						})
+					)
+					.then(resp => Notify.success("The Attendancy has been reported"))
+					.catch(err => Notify.error("There was an error reporting the attendancy"));
+			}
 		}
 	};
 };

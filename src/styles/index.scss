@@ -1,0 +1,62 @@
+/* 
+    General Styles
+*/
+
+@import 'to-delete';
+@import '~@breathecode/ui-components/src/theme/colors';
+
+.bc-popover{
+    background: white;
+    border: 2px solid $light-grey;
+    border-radius: 5px;
+    padding: 5px 5px 5px 25px;
+    margin-bottom: 0px;
+    max-width: 300px;
+    li{
+        list-style-type: disc;
+    }
+}
+.timeline ul li:hover{
+    background: #f8f9fa;
+}
+.bcdroplink.dropdown .btn.dropdown-toggle{
+    font-size: inherit !important;
+    padding: 0;
+}
+.dayview{
+    .description{
+        border: 2px solid $light-grey;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 20px;
+        width: 100%;
+        background: white;
+        .info-bar{
+            margin-top: 5px;
+            padding: 5px 0px 0px 0px;
+            border-top: 1px solid $light-grey;
+            margin-bottom: 5px;
+        }
+        .a, .dropdown-toggle{
+            color: $light-blue;
+        }
+        .a:hover{
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        /* On screens that are 992px or less, set the background color to blue */
+        @media screen and (min-width: 1000px) {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 380px;
+            margin-bottom: 0px;
+        }
+
+    }
+    .instructions{
+        padding: 0;
+        margin: 0;
+        max-width: 600px;
+    }
+}

@@ -45,7 +45,7 @@ class Wrapper {
 	fetch(...args) {
 		return fetch(...args);
 	}
-	req(method, path, args) {
+	req(method, path, args, decode = true) {
 		const token = this.options.getToken(path.indexOf("//assets") == -1 ? "api" : "assets");
 		let opts = {
 			method,
@@ -76,7 +76,7 @@ class Wrapper {
 					//recalculate to check if it there is pending requests
 					this.calculatePending();
 
-					if (resp.status == 200) return resp.json();
+					if (resp.status == 200) return decode ? resp.json() : resp.text();
 					else {
 						this._logError(resp);
 						if (resp.status == 403)
@@ -187,6 +187,11 @@ class Wrapper {
 			get: slug => {
 				if (!slug) throw new Error("Missing slug");
 				else return this.get(url + "/" + slug);
+			},
+			getInstructions: (slug = null, dayNumber = null) => {
+				if (!slug) throw new Error("Missing slug");
+				if (!dayNumber) throw new Error("Missing slug");
+				else return this.get(url + `/${slug}/day/${dayNumber}/instructions`, null, false);
 			}
 		};
 	}
@@ -390,6 +395,23 @@ class Wrapper {
 			execute: (slug = null) => {
 				if (!slug) throw new Error("Missing zap slug");
 				return this.post(url + "/zap/execute/" + slug);
+			}
+		};
+	}
+	activity() {
+		let url = this.options.assetsPath;
+		return {
+			all: user => {
+				return this.get(url + "/activity/user");
+			},
+			get: id => {
+				return this.get(url + "/activity/user/" + id);
+			},
+			add: (id, args) => {
+				return this.post(url + "/activity/user/" + id, args);
+			},
+			addBulk: activities => {
+				return this.post(url + "/activity/user/bulk", activities);
 			}
 		};
 	}

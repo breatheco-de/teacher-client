@@ -1,6 +1,6 @@
 import { Session } from "bc-react-session";
 import BC from "./utils/api.js";
-//import { setLoading } from '@breathecode/ui-components';
+import { setLoading } from "@breathecode/ui-components";
 
 BC.setOptions({
 	getToken: (type = "api") => {
@@ -14,7 +14,7 @@ BC.setOptions({
 			return "Bearer " + token;
 		}
 	},
-	//onLoading: setLoading,
+	onLoading: setLoading,
 	onLogout: () => logout()
 });
 
@@ -61,6 +61,14 @@ export const logout = (history = null) => {
 export const remind = email => {
 	return BC.credentials()
 		.remind(email)
+		.then(data => {
+			return data;
+		});
+};
+
+export const fetchInstructions = (slug, dayNumber) => {
+	return BC.syllabus()
+		.getInstructions(slug, dayNumber)
 		.then(data => {
 			return data;
 		});

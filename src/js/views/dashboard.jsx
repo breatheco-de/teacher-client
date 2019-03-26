@@ -1,11 +1,13 @@
 import React from "react";
 import { Redirect, Switch, Route } from "react-router";
 import { PropTypes } from "prop-types";
-import { logout } from "../actions.js";
+import { logout, fetchInstructions } from "../actions.js";
 import "../../styles/home.css";
-import { List, Panel, Sidebar, MenuItem, TimeLine, CheckBox, Button } from "@breathecode/ui-components";
+import { List, Panel, Sidebar, MenuItem, TimeLine, CheckBox, Button, DropLink, Loading } from "@breathecode/ui-components";
 import { Session } from "bc-react-session";
 import { Context } from "../store/cohortContext.jsx";
+import ReactMarkdown from "react-markdown";
+import Popover from "../components/Popover.jsx";
 
 export const Dashboard = properties => {
 	const { currentCohort } = Session.getPayload();
@@ -89,6 +91,7 @@ class AttendancyView extends React.Component {
 		};
 	}
 	render() {
+		const { currentCohort } = Session.getPayload();
 		return (
 			<Context.Consumer>
 				{({ store, actions }) => (
@@ -108,7 +111,12 @@ class AttendancyView extends React.Component {
 								</li>
 							))}
 						</ul>
-						<Button label="Send Attendancy Report" onClick={() => actions.saveAttendancy(this.state.attendancy)} />
+						<Button
+							type="info"
+							className="w-100 mt-4"
+							label="Send Attendancy Report"
+							onClick={() => actions.saveCohortAttendancy(currentCohort.profile_slug, this.state.rsvp)}
+						/>
 					</div>
 				)}
 			</Context.Consumer>
@@ -116,24 +124,107 @@ class AttendancyView extends React.Component {
 	}
 }
 
-const DayView = ({ match }) => (
-	<Context.Consumer>
-		{({ store }) => {
-			const day = store.syllabus.find(d => d.dayNumber == match.params.day_number);
-			if (typeof day === "undefined") return <h2>Day not found</h2>;
-			return (
-				<div className="row">
-					<div className="col-12">
-						<h2>
-							<span className="badge">{day.label}</span> {day.technologies.join(",")}
-						</h2>
-						<p>{day.instructions || day.teacher_instructions}</p>
-					</div>
-				</div>
-			);
-		}}
-	</Context.Consumer>
-);
+class DayView extends React.Component {
+	constructor() {
+		super();
+		this.state = {
+			instructions: null,
+			day: null
+		};
+		this.loading = false;
+	}
+
+	loadInstructions(day) {
+		const { currentCohort } = Session.getPayload();
+		if (typeof currentCohort.profile_slug !== "undefined" && !this.loading) {
+			this.loading = true;
+			fetchInstructions(currentCohort.profile_slug, day.dayNumber).then(instructions => {
+				this.loading = false;
+				this.setState({ instructions, day });
+			});
+		}
+	}
+	render() {
+		const { match } = this.props;
+		return (
+			<Context.Consumer>
+				{({ store }) => {
+					const day = store.syllabus.find(d => d.dayNumber == match.params.day_number);
+					if (typeof day == "undefined") return <Loading />;
+					if (day && (!this.state.day || day.dayNumber !== this.state.day.dayNumber)) this.loadInstructions(day);
+					return (
+						<div className="dayview p-0 pl-3">
+							<div className="description">
+								<h3>
+									<span className="badge badge-secondary">{day.label}</span>{" "}
+									{Array.isArray(day.technologies) && day.technologies.join(",")}
+								</h3>
+								<p>{day.instructions || day.teacher_instructions}</p>
+								{day.project && (
+									<p className="info-bar">
+										<a rel="noopener noreferrer" target="_blank" href={day.project.instructions || day.project.url} className="a">
+											Project: {day.project.title || day.project}
+										</a>
+										{day.project.solution && (
+											<a
+												className="btn btn-sm btn-light ml-2"
+												rel="noopener noreferrer"
+												target="_blank"
+												href={day.project.solution}>
+												Solution
+											</a>
+										)}
+									</p>
+								)}
+								{Array.isArray(day["key-concepts"]) && (
+									<p className="info-bar">
+										<Popover
+											body={
+												<ul className="bc-popover">
+													{day["key-concepts"].map((k, i) => (
+														<li key={i}>{k}</li>
+													))}
+												</ul>
+											}>
+											<span className="a">Key Concepts</span>
+										</Popover>
+									</p>
+								)}
+								{Array.isArray(day["replits"]) && (
+									<p className="info-bar">
+										<DropLink
+											dropdown={day["replits"].map(r => ({
+												label: r.title,
+												url: `https://assets.breatheco.de/apps/replit/?r=${r.slug}`
+											}))}
+											onSelect={opt => window.open(opt.url)}>
+											Replits
+										</DropLink>
+									</p>
+								)}
+								{Array.isArray(day["assignments"]) && (
+									<p className="info-bar">
+										<DropLink
+											dropdown={day["assignments"].map(a => ({
+												label: a,
+												url: `https://projects.breatheco.de/d/${a}#readme`
+											}))}
+											onSelect={opt => window.open(opt.url)}>
+											Assignments
+										</DropLink>
+									</p>
+								)}
+							</div>
+							<div className="instructions">
+								<ReactMarkdown source={this.state.instructions} />
+							</div>
+						</div>
+					);
+				}}
+			</Context.Consumer>
+		);
+	}
+}
 DayView.propTypes = {
 	history: PropTypes.object,
 	match: PropTypes.object
@@ -159,6 +250,18 @@ export class CohortView extends React.Component {
 							typeof opt.path == "undefined" || !opt.path ? this.setState({ sidebarMode: opt.mode }) : this.props.history.push(opt.path)
 						}
 					/>
+				)}
+				footer={() => (
+					<div className="sidebar-footer">
+						<a
+							href="#"
+							onClick={e => {
+								e.preventDefault();
+								logout();
+							}}>
+							<i className="fa fa-power-off" />
+						</a>
+					</div>
 				)}
 				onBrandClick={() => this.setState({ sidebarMode: "home" })}>
 				<Switch>
