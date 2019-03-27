@@ -1,6 +1,30 @@
+@import '~@breathecode/ui-components/src/theme/colors';
+
 .bc-loading-bar, .loading{
     z-index: 999;
 }
 .sidebar-wrapper{
     z-index: 10;
+}
+h1{
+  &:before{
+      content: '# ';
+      margin-left: -10px;
+  }  
+}
+h2{
+  &:before{
+      content: '## ';
+      margin-left: -20px;
+  }  
+}
+h3{
+  &:before{
+      content: '### ';
+      margin-left: -10px;
+  }  
+}
+h1:before,h2:before,h3:before{
+    font-size: 50%;
+    color: $grey-600;
 }

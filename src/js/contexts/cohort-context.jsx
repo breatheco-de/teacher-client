@@ -2,7 +2,9 @@ import React from "react";
 import BC from "../utils/api.js";
 import { Session } from "bc-react-session";
 import { Notify } from "bc-react-notifier";
-export const Context = React.createContext(null);
+
+export const CohortContext = React.createContext(null);
+
 const getState = ({ getStore, setStore }) => {
 	return {
 		store: {
@@ -84,9 +86,9 @@ const Store = PassedComponent => {
 
 		render() {
 			return (
-				<Context.Provider value={this.state}>
+				<CohortContext.Provider value={this.state}>
 					<PassedComponent {...this.props} />
-				</Context.Provider>
+				</CohortContext.Provider>
 			);
 		}
 	}

@@ -5,7 +5,7 @@ import { logout, fetchInstructions } from "../actions.js";
 import "../../styles/home.css";
 import { List, Panel, Sidebar, MenuItem, TimeLine, CheckBox, Button, DropLink, Loading } from "@breathecode/ui-components";
 import { Session } from "bc-react-session";
-import { Context } from "../store/cohortContext.jsx";
+import { CohortContext } from "../contexts/cohort-context.jsx";
 import ReactMarkdown from "react-markdown";
 import Popover from "../components/Popover.jsx";
 
@@ -64,7 +64,7 @@ const Menu = ({ onClick, mode, cohort }) => {
 		);
 	if (mode == "syllabus")
 		return (
-			<Context.Consumer>
+			<CohortContext.Consumer>
 				{({ store }) => (
 					<TimeLine
 						height="100%"
@@ -72,7 +72,7 @@ const Menu = ({ onClick, mode, cohort }) => {
 						onClick={day => onClick({ mode: "syllabus", path: `/cohort/${cohort}/d/${day.dayNumber}` })}
 					/>
 				)}
-			</Context.Consumer>
+			</CohortContext.Consumer>
 		);
 
 	return <div className="alert alert-danger">Invalid Menu Type: {mode}</div>;
@@ -93,7 +93,7 @@ class AttendancyView extends React.Component {
 	render() {
 		const { currentCohort } = Session.getPayload();
 		return (
-			<Context.Consumer>
+			<CohortContext.Consumer>
 				{({ store, actions }) => (
 					<div className="m-0 p-0">
 						<ul className="m-0 p-0">
@@ -119,7 +119,7 @@ class AttendancyView extends React.Component {
 						/>
 					</div>
 				)}
-			</Context.Consumer>
+			</CohortContext.Consumer>
 		);
 	}
 }
@@ -147,7 +147,7 @@ class DayView extends React.Component {
 	render() {
 		const { match } = this.props;
 		return (
-			<Context.Consumer>
+			<CohortContext.Consumer>
 				{({ store }) => {
 					const day = store.syllabus.find(d => d.dayNumber == match.params.day_number);
 					if (typeof day == "undefined") return <Loading />;
@@ -221,7 +221,7 @@ class DayView extends React.Component {
 						</div>
 					);
 				}}
-			</Context.Consumer>
+			</CohortContext.Consumer>
 		);
 	}
 }
