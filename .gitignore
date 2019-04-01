@@ -6,6 +6,9 @@
 !.github
 php_errorlog
 .log
+!.gitkeep
+!.htaccess
+!.eslintrc
 
 # track this file .gitignore (i.e. do NOT ignore it)
 !composer.json
@@ -59,6 +62,3 @@ public/*
 dist/*
 !dist/index.html
 
-!.gitkeep
-!.htaccess
-!.eslintrc
