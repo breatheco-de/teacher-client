@@ -1,6 +1,6 @@
 {
 	"name": "react-hello-webapp",
-	"version": "0.01",
+	"version": "0.1",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
