@@ -1,12 +1,11 @@
 import React from "react";
-import { Redirect, Switch, Route } from "react-router";
+import { Redirect, Switch, Route, withRouter } from "react-router";
 import { PropTypes } from "prop-types";
 import { logout, fetchInstructions } from "../actions.js";
 import "../../styles/home.css";
-import { List, Panel, Sidebar, MenuItem, TimeLine, CheckBox, Button, DropLink, Loading } from "@breathecode/ui-components";
+import { List, Panel, Sidebar, MenuItem, TimeLine, CheckBox, Button, DropLink, Loading, MarkdownParser } from "@breathecode/ui-components";
 import { Session } from "bc-react-session";
 import { CohortContext } from "../contexts/cohort-context.jsx";
-import ReactMarkdown from "react-markdown";
 import Popover from "../components/Popover.jsx";
 
 export const Dashboard = properties => {
@@ -49,7 +48,7 @@ export const ChooseCohort = properties => {
 	);
 };
 
-const Menu = ({ onClick, mode, cohort }) => {
+const Menu = withRouter(({ onClick, mode, cohort, match }) => {
 	if (mode == "home")
 		return (
 			<ul className="px-3">
@@ -69,16 +68,18 @@ const Menu = ({ onClick, mode, cohort }) => {
 					<TimeLine
 						height="100%"
 						days={store.syllabus}
-						onClick={day => onClick({ mode: "syllabus", path: `/cohort/${cohort}/d/${day.dayNumber}` })}
+						selectedOption={match.params.day_number}
+						onClick={day => !day.isWeekend && onClick({ mode: "syllabus", path: `/cohort/${cohort}/d/${day.dayNumber}` })}
 					/>
 				)}
 			</CohortContext.Consumer>
 		);
 
 	return <div className="alert alert-danger">Invalid Menu Type: {mode}</div>;
-};
+});
 Menu.propTypes = {
 	cohort: PropTypes.string.isRequired,
+	match: PropTypes.object,
 	mode: PropTypes.string.isRequired,
 	onClick: PropTypes.func.isRequired
 };
@@ -96,6 +97,7 @@ class AttendancyView extends React.Component {
 			<CohortContext.Consumer>
 				{({ store, actions }) => (
 					<div className="m-0 p-0">
+						<h1>Attendance for day {currentCohort.current_day}</h1>
 						<ul className="m-0 p-0">
 							{store.students.map((s, i) => (
 								<li key={i}>
@@ -162,9 +164,17 @@ class DayView extends React.Component {
 								<p>{day.instructions || day.teacher_instructions}</p>
 								{day.project && (
 									<p className="info-bar">
-										<a rel="noopener noreferrer" target="_blank" href={day.project.instructions || day.project.url} className="a">
-											Project: {day.project.title || day.project}
-										</a>
+										{day.project.instructions || day.project.url ? (
+											<a
+												rel="noopener noreferrer"
+												target="_blank"
+												href={day.project.instructions || day.project.url}
+												className="a">
+												Project: {day.project.title || day.project}
+											</a>
+										) : (
+											<span>Project: {day.project.title || day.project}</span>
+										)}
 										{day.project.solution && (
 											<a
 												className="btn btn-sm btn-light ml-2"
@@ -216,7 +226,7 @@ class DayView extends React.Component {
 								)}
 							</div>
 							<div className="instructions">
-								<ReactMarkdown source={this.state.instructions} />
+								<MarkdownParser source={this.state.instructions} />
 							</div>
 						</div>
 					);

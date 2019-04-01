@@ -6,25 +6,13 @@
 .sidebar-wrapper{
     z-index: 10;
 }
-h1{
-  &:before{
-      content: '# ';
-      margin-left: -10px;
-  }  
-}
-h2{
-  &:before{
-      content: '## ';
-      margin-left: -20px;
-  }  
-}
-h3{
-  &:before{
-      content: '### ';
-      margin-left: -10px;
-  }  
-}
 h1:before,h2:before,h3:before{
+    content: '# ';
+    margin-left: -10px;
     font-size: 50%;
     color: $grey-600;
+}
+
+.bc-readme{
+    li{ list-style-type: disc; }
 }

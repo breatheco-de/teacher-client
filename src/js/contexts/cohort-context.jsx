@@ -56,8 +56,15 @@ const Store = PassedComponent => {
 						[],
 						data.weeks.map(week =>
 							week.days.filter(d => d !== null).map(d => {
-								d.dayNumber = dayNumber;
-								dayNumber++;
+								d.isWeekend = d.label.toLowerCase().includes("weekend");
+								d.dayNumber = null;
+								if (!d.isWeekend) {
+									if (d.partial == "am") d.dayNumber = dayNumber + d.partial;
+									else {
+										d.dayNumber = dayNumber + (d.partial || "");
+										dayNumber++;
+									}
+								}
 								return d;
 							})
 						)
