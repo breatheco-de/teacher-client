@@ -273,11 +273,48 @@ export class CohortView extends React.Component {
 						</a>
 					</div>
 				)}
-				onBrandClick={() => this.setState({ sidebarMode: "home" })}>
+				onBrandClick={() => {
+					this.setState({ sidebarMode: "home" });
+					this.props.history.push("/");
+				}}>
 				<Switch>
 					<Route exact path={this.props.match.path + "/attendance"} component={AttendancyView} />
 					<Route exact path={this.props.match.path + "/d/:day_number"} component={DayView} />
-					<Route exact path={this.props.match.path} render={() => <h1>Welcome</h1>} />
+					<Route
+						exact
+						path={this.props.match.path}
+						render={() => (
+							<div>
+								<h1>Welcome Teacher! 🤓</h1>
+								<p>Here are a few extra resources you may need during your classes: </p>
+								<ul>
+									<li>
+										<a
+											target="_blank"
+											rel="noopener noreferrer"
+											href="https://docs.google.com/document/d/1EkyC3aF9Ga0A5chiukH8MeWVGc1XBaknvaaxmr8rUSw/edit">
+											🎖The Academic department guidelines
+										</a>
+									</li>
+									<li>
+										<a target="_blank" rel="noopener noreferrer" href="https://projects.breatheco.de">
+											🚴‍♀️Pool of projects for the students
+										</a>
+									</li>
+									<li>
+										<a target="_blank" rel="noopener noreferrer" href="https://content.breatheco.de/lesson/">
+											📖 Ugly list of all the lessons at the academy
+										</a>
+									</li>
+									<li>
+										<a target="_blank" rel="noopener noreferrer" href="https://breatheco.de/en/assets/">
+											📃 Additional assets for the students
+										</a>
+									</li>
+								</ul>
+							</div>
+						)}
+					/>
 					<Route render={() => <h1>Not found</h1>} />
 				</Switch>
 			</Sidebar>
