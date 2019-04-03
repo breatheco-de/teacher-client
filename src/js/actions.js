@@ -1,6 +1,7 @@
 import { Session } from "bc-react-session";
 import BC from "./utils/api.js";
 import { setLoading } from "@breathecode/ui-components";
+import { Notify } from "bc-react-notifier";
 
 BC.setOptions({
 	getToken: (type = "api") => {
@@ -70,6 +71,16 @@ export const fetchInstructions = (slug, dayNumber) => {
 	return BC.syllabus()
 		.getInstructions(slug, dayNumber)
 		.then(data => {
+			return data;
+		});
+};
+
+export const updateCohortDay = (cohortId, currenyDay) => {
+	return BC.cohort()
+		.updateCurrentDay(cohortId, currenyDay)
+		.then(data => {
+			Session.setPayload({ currentCohort: data.data || data });
+			Notify.success("The cohort current day was update successfully");
 			return data;
 		});
 };

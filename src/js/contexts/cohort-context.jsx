@@ -14,6 +14,7 @@ const getState = ({ getStore, setStore }) => {
 		actions: {
 			saveCohortAttendancy: (cohortSlug, attendancy) => {
 				const { students } = getStore();
+				const { currentCohort } = Session.getPayload();
 				BC.activity()
 					.addBulk(
 						students.map(stud => {
@@ -22,7 +23,7 @@ const getState = ({ getStore, setStore }) => {
 								id: stud.id,
 								email: stud.email,
 								slug: typeof attended === "undefined" || !attended ? "classroom_unattendance" : "classroom_attendance",
-								data: `{ "cohort": "${cohortSlug}"}`
+								data: `{ "cohort": "${cohortSlug}", "day": "${currentCohort.current_day}"}`
 							};
 						})
 					)

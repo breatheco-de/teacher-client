@@ -303,6 +303,11 @@ class Wrapper {
 			update: (id, args) => {
 				return this.post(url + "/cohort/" + id, args);
 			},
+			updateCurrentDay: (id, currenyDay) => {
+				return this.post(url + "/cohort/" + id + "/current_day", {
+					current_day: currenyDay
+				});
+			},
 			delete: id => {
 				return this.delete(url + "/cohort/" + id);
 			},

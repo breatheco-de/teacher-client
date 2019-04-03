@@ -1,21 +1,24 @@
 import React from "react";
 import { Redirect, Switch, Route, withRouter } from "react-router";
 import { PropTypes } from "prop-types";
-import { logout, fetchInstructions } from "../actions.js";
+import { logout, fetchInstructions, updateCohortDay } from "../actions.js";
 import "../../styles/home.css";
-import { List, Panel, Sidebar, MenuItem, TimeLine, CheckBox, Button, DropLink, Loading, MarkdownParser } from "@breathecode/ui-components";
+import { List, Panel, Anchor, Sidebar, MenuItem, TimeLine, CheckBox, Button, DropLink, Loading, MarkdownParser } from "@breathecode/ui-components";
 import { Session } from "bc-react-session";
 import { CohortContext } from "../contexts/cohort-context.jsx";
 import Popover from "../components/Popover.jsx";
 
-export const Dashboard = properties => {
-	const { currentCohort } = Session.getPayload();
-	if (typeof currentCohort == "undefined" || !currentCohort || currentCohort.length > 1) return <Redirect to="/dashboard" />;
-	else return <Redirect to={`/cohort/${currentCohort.slug}`} />;
+export const RedirectView = properties => {
+	const { payload, active } = Session.get();
+	if (!active || typeof payload.cohorts == "undefined") return <Redirect to="/login" />;
+	else if (typeof payload.currentCohort == "undefined" || !payload.currentCohort || payload.currentCohort.length > 1)
+		return <Redirect to="/choose" />;
+	else return <Redirect to={`/cohort/${payload.currentCohort.slug}`} />;
 };
 
 export const ChooseCohort = properties => {
 	const payload = Session.getPayload();
+	if (typeof payload.cohorts == "undefined") return <Redirect to="/login" />;
 	return (
 		<Panel className="choose-view" style={{ padding: "10px" }} zDepth={1}>
 			<div className="col-10 col-sm-6 mx-auto pt-5">
@@ -83,21 +86,61 @@ Menu.propTypes = {
 	mode: PropTypes.string.isRequired,
 	onClick: PropTypes.func.isRequired
 };
-
 class AttendancyView extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			rsvp: []
+			rsvp: [],
+			changeDay: false,
+			currentDay: 1,
+			currentCohort: null
 		};
 	}
-	render() {
+	componentDidMount() {
 		const { currentCohort } = Session.getPayload();
+		this.setState({ currentCohort, currentDay: currentCohort.current_day });
+	}
+	render() {
+		if (!this.state.currentCohort) return <Loading show={true} />;
 		return (
 			<CohortContext.Consumer>
 				{({ store, actions }) => (
 					<div className="m-0 p-0">
-						<h1>Attendance for day {currentCohort.current_day}</h1>
+						<h1>
+							Attendance for day:
+							{this.state.changeDay ? (
+								<div className="input-group mb-3 d-inline-block" style={{ width: "200px" }}>
+									<input
+										type="number"
+										style={{ minWidth: "60px" }}
+										min={0}
+										className="form-control d-inline-block"
+										value={this.state.currentDay}
+										onChange={e => this.setState({ currentDay: e.target.value })}
+									/>
+									<div
+										className="input-group-append d-inline-block"
+										onClick={() =>
+											updateCohortDay(this.state.currentCohort.id, this.state.currentDay).then(() =>
+												this.setState({ currentDay: this.state.currentDay, changeDay: false })
+											)
+										}>
+										<span className="input-group-text bg-success">
+											<i className="fas fa-check" />
+										</span>
+									</div>
+									<div className="input-group-append d-inline-block" onClick={() => this.setState({ changeDay: false })}>
+										<span className="input-group-text">
+											<i className="fas fa-times" />
+										</span>
+									</div>
+								</div>
+							) : (
+								<span className="badge badge-light editable" onClick={() => this.setState({ changeDay: true })}>
+									{this.state.currentDay} <i className="fas fa-pencil-alt" />
+								</span>
+							)}
+						</h1>
 						<ul className="m-0 p-0">
 							{store.students.map((s, i) => (
 								<li key={i}>
@@ -114,10 +157,10 @@ class AttendancyView extends React.Component {
 							))}
 						</ul>
 						<Button
-							type="info"
+							type="primary"
 							className="w-100 mt-4"
 							label="Send Attendancy Report"
-							onClick={() => actions.saveCohortAttendancy(currentCohort.profile_slug, this.state.rsvp)}
+							onClick={() => actions.saveCohortAttendancy(this.state.currentCohort.profile_slug, this.state.rsvp)}
 						/>
 					</div>
 				)}
@@ -250,6 +293,7 @@ export class CohortView extends React.Component {
 	}
 
 	render() {
+		const { currentCohort } = Session.getPayload();
 		return (
 			<Sidebar
 				menu={() => (
@@ -285,7 +329,9 @@ export class CohortView extends React.Component {
 						path={this.props.match.path}
 						render={() => (
 							<div>
-								<h1>Welcome Teacher! 🤓</h1>
+								<h1>
+									{currentCohort.name} <span className="badge badge-secondary">day {currentCohort.current_day}</span> 🤓
+								</h1>
 								<p>Here are a few extra resources you may need during your classes: </p>
 								<ul>
 									<li>
