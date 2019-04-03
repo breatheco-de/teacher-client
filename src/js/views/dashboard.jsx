@@ -10,7 +10,7 @@ import Popover from "../components/Popover.jsx";
 
 export const Dashboard = properties => {
 	const { currentCohort } = Session.getPayload();
-	if (typeof currentCohort == "undefined" || !currentCohort) return <Redirect to="/dashboard" />;
+	if (typeof currentCohort == "undefined" || !currentCohort || currentCohort.length > 1) return <Redirect to="/dashboard" />;
 	else return <Redirect to={`/cohort/${currentCohort.slug}`} />;
 };
 
