@@ -183,10 +183,15 @@ class DayView extends React.Component {
 		const { currentCohort } = Session.getPayload();
 		if (typeof currentCohort.profile_slug !== "undefined" && !this.loading) {
 			this.loading = true;
-			fetchInstructions(currentCohort.profile_slug, day.dayNumber).then(instructions => {
-				this.loading = false;
-				this.setState({ instructions, day });
-			});
+			fetchInstructions(currentCohort.profile_slug, day.dayNumber)
+				.then(instructions => {
+					this.loading = false;
+					this.setState({ instructions, day });
+				})
+				.catch(e => {
+					this.loading = false;
+					this.setState({ instructions: "# ☢ There was a problem loading this day" });
+				});
 		}
 	}
 	render() {
@@ -264,6 +269,18 @@ class DayView extends React.Component {
 											}))}
 											onSelect={opt => window.open(opt.url)}>
 											Assignments
+										</DropLink>
+									</p>
+								)}
+								{Array.isArray(day["lessons"]) && (
+									<p className="info-bar">
+										<DropLink
+											dropdown={day["lessons"].map(l => ({
+												label: l.title || l,
+												url: `https://content.breatheco.de/lesson/${l.slug || l}`
+											}))}
+											onSelect={opt => window.open(opt.url)}>
+											Lessons
 										</DropLink>
 									</p>
 								)}
