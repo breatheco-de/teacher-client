@@ -10,6 +10,7 @@ php_errorlog
 !.htaccess
 !.eslintrc
 !.env.prod
+!.env.dev
 
 # track this file .gitignore (i.e. do NOT ignore it)
 !composer.json

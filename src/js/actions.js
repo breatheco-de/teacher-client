@@ -47,8 +47,8 @@ export const login = (username, password, history) => {
 				type: data.type || "teacher",
 				currentCohort: !Array.isArray(data.cohorts) ? null : data.cohorts.length === 1 ? data.cohorts[0] : data.cohorts
 			};
-			Session.start({ payload: user, expiration: 3600 * 24 });
 
+			Session.start({ payload: user, expiration: 3600 * 24 });
 			history.push("/choose");
 		});
 };

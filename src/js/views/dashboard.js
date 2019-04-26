@@ -1,12 +1,26 @@
 import React from "react";
-import { Redirect, Switch, Route, withRouter } from "react-router";
+import { Redirect, Switch, Route, withRouter, Link } from "react-router";
 import { PropTypes } from "prop-types";
+import BC from "../utils/api.js";
 import { logout, fetchInstructions, updateCohortDay } from "../actions.js";
 import "../../styles/home.css";
-import { List, Panel, Anchor, Sidebar, MenuItem, TimeLine, CheckBox, Button, DropLink, Loading, MarkdownParser } from "@breathecode/ui-components";
+import {
+	List,
+	Panel,
+	Anchor,
+	Sidebar,
+	MenuItem,
+	TimeLine,
+	CheckBox,
+	Button,
+	DropLink,
+	Loading,
+	MarkdownParser,
+	Icon
+} from "@breathecode/ui-components";
 import { Session } from "bc-react-session";
-import { CohortContext } from "../contexts/cohort-context.jsx";
-import Popover from "../components/Popover.jsx";
+import { CohortContext } from "../contexts/cohort-context";
+import Popover from "../components/Popover";
 
 export const RedirectView = properties => {
 	const { payload, active } = Session.get();
@@ -29,10 +43,22 @@ export const ChooseCohort = properties => {
 							<button
 								className="btn btn-light ml-3 float-right"
 								onClick={() => {
-									Session.setPayload({
-										currentCohort: cohort
-									});
-									properties.history.push("/cohort/" + cohort.slug);
+									BC.streaming()
+										.getCohort(cohort.slug)
+										.then(streaming => {
+											cohort.streaming = streaming;
+											Session.setPayload({
+												currentCohort: cohort
+											});
+											properties.history.push("/cohort/" + cohort.slug);
+										})
+										.catch(() => {
+											cohort.streaming = null;
+											Session.setPayload({
+												currentCohort: cohort
+											});
+											properties.history.push("/cohort/" + cohort.slug);
+										});
 								}}>
 								<i className="fas fa-external-link-alt" /> launch this course
 							</button>
@@ -52,7 +78,8 @@ export const ChooseCohort = properties => {
 };
 
 const Menu = withRouter(({ onClick, mode, cohort, match }) => {
-	if (mode == "home")
+	if (mode == "home") {
+		const { currentCohort } = Session.getPayload();
 		return (
 			<ul className="px-3">
 				<MenuItem label="Syllabus" iconName="graduationCap" collapsed={false} onClick={() => onClick({ mode: "syllabus" })} />
@@ -62,9 +89,23 @@ const Menu = withRouter(({ onClick, mode, cohort, match }) => {
 					collapsed={false}
 					onClick={() => onClick({ mode: "home", path: `/cohort/${cohort}/attendance` })}
 				/>
+				<MenuItem
+					label="Code"
+					iconName="code"
+					collapsed={false}
+					onClick={() => window.open("https://assets.breatheco.de/apps/new-project")}
+				/>
+				{currentCohort.streaming && (
+					<MenuItem
+						label="Live Class"
+						iconName="youtube"
+						collapsed={false}
+						onClick={() => window.open(`https://assets.breatheco.de/apps/streaming-qr?cohort=${cohort}`)}
+					/>
+				)}
 			</ul>
 		);
-	if (mode == "syllabus")
+	} else if (mode == "syllabus")
 		return (
 			<CohortContext.Consumer>
 				{({ store }) => (
@@ -331,6 +372,14 @@ export class CohortView extends React.Component {
 								logout();
 							}}>
 							<i className="fa fa-power-off" />
+						</a>
+						<a
+							href="#"
+							onClick={e => {
+								e.preventDefault();
+								this.props.history.push("/choose");
+							}}>
+							<Icon type="exchange" />
 						</a>
 					</div>
 				)}
