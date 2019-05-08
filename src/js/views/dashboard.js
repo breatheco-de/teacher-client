@@ -352,7 +352,7 @@ export class CohortView extends React.Component {
 	}
 
 	render() {
-		const { currentCohort, bc_id, access_token } = Session.getPayload();
+		const { currentCohort, bc_id, access_token, assets_token } = Session.getPayload();
 		return (
 			<Sidebar
 				menu={() => (
@@ -400,7 +400,7 @@ export class CohortView extends React.Component {
 									<IFrameView
 										src={`https://assets.breatheco.de/apps/replit-maker/?cohort=${
 											currentCohort.slug
-										}&teacher=${bc_id}&bc_token=${access_token}`}
+										}&teacher=${bc_id}&bc_token=${access_token}&access_token=${assets_token}`}
 									/>
 								)}
 							/>
@@ -412,7 +412,7 @@ export class CohortView extends React.Component {
 										{!store.replits && (
 											<div className="alert alert-danger">
 												You need to set the cohort replits before continuing with the class.
-												<Button onClick={() => this.props.history.push("./replits")}>
+												<Button onClick={() => this.props.history.push(`/cohort/${currentCohort.slug}/replits`)}>
 													Click here to upload the replit links
 												</Button>
 												.
