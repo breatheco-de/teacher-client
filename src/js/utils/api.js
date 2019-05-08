@@ -379,6 +379,14 @@ class Wrapper {
 			}
 		};
 	}
+	replit() {
+		let url = this.options.assetsPath;
+		return {
+			byCohort: slug => {
+				return this.get(url + "/replit/cohort/" + slug);
+			}
+		};
+	}
 	catalog() {
 		let url = this.options.apiPath;
 		return {

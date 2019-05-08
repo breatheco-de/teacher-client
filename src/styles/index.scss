@@ -27,7 +27,7 @@
         border: 2px solid $light-grey;
         border-radius: 5px;
         padding: 10px;
-        margin-bottom: 20px;
+        margin: 20px 0px;
         width: 100%;
         background: white;
         .info-bar{
@@ -49,4 +49,18 @@
         padding: 0;
         margin: 0;
     }
+}
+@media screen and (min-width: 768px){
+    body .page-wrapper .page-content{
+        padding-top: 0;
+        padding-right: 0;
+    }
+    body .page-wrapper.toggled .page-content{
+        padding-top: 0;
+        padding-left: 260px;
+        padding-right: 0;
+    }
+}
+.bcnotifier {
+    display: none;
 }

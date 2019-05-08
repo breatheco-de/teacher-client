@@ -9,7 +9,8 @@ const getState = ({ getStore, setStore }) => {
 	return {
 		store: {
 			syllabus: [],
-			students: []
+			students: [],
+			replits: null
 		},
 		actions: {
 			saveCohortAttendancy: (cohortSlug, attendancy) => {
@@ -89,6 +90,17 @@ const Store = PassedComponent => {
 				.catch(data => {
 					if (typeof data.pending === "undefined") console.error(data);
 					else console.warn(data.msg);
+				});
+
+			BC.replit()
+				.byCohort(currentCohort.slug)
+				.then(replits => {
+					this.setState({
+						store: Object.assign(this.state.store, { replits: replits })
+					});
+				})
+				.catch(() => {
+					console.error("Hello");
 				});
 		}
 
