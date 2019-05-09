@@ -90,19 +90,9 @@ const Menu = withRouter(({ onClick, mode, cohort, match, history }) => {
 					onClick={() => onClick({ mode: "home", path: `/cohort/${cohort}/attendance` })}
 				/>
 				<MenuItem label="Replits" iconName="code" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/replits`)} />
-				<MenuItem
-					label="Code"
-					iconName="code"
-					collapsed={false}
-					onClick={() => window.open("https://assets.breatheco.de/apps/new-project")}
-				/>
+				<MenuItem label="Code" iconName="code" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/new-project`)} />
 				{currentCohort.streaming && (
-					<MenuItem
-						label="Live Class"
-						iconName="youtube"
-						collapsed={false}
-						onClick={() => window.open(`https://assets.breatheco.de/apps/streaming-qr?cohort=${cohort}`)}
-					/>
+					<MenuItem label="Live Class" iconName="youtube" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/live`)} />
 				)}
 			</ul>
 		);
@@ -352,7 +342,7 @@ export class CohortView extends React.Component {
 	}
 
 	render() {
-		const { currentCohort, bc_id, access_token, assets_token } = Session.getPayload();
+		const { currentCohort, bc_id, access_token, assets_token, email } = Session.getPayload();
 		return (
 			<Sidebar
 				menu={() => (
@@ -403,6 +393,22 @@ export class CohortView extends React.Component {
 										}&teacher=${bc_id}&bc_token=${access_token}&assets_token=${assets_token}`}
 									/>
 								)}
+							/>
+							<Route
+								exact
+								path={this.props.match.path + "/new-project"}
+								render={() => (
+									<IFrameView
+										src={`https://assets.breatheco.de/apps/new-project/?email=${
+											currentCohort.slug
+										}&bc_token=${access_token}&assets_token=${assets_token}`}
+									/>
+								)}
+							/>
+							<Route
+								exact
+								path={this.props.match.path + "/live"}
+								render={() => <IFrameView src={`https://assets.breatheco.de/apps/streaming-qr?cohort=${currentCohort.slug}`} />}
 							/>
 							<Route
 								exact
