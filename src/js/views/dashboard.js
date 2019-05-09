@@ -400,7 +400,7 @@ export class CohortView extends React.Component {
 									<IFrameView
 										src={`https://assets.breatheco.de/apps/replit-maker/?cohort=${
 											currentCohort.slug
-										}&teacher=${bc_id}&bc_token=${access_token}&access_token=${assets_token}`}
+										}&teacher=${bc_id}&bc_token=${access_token}&assets_token=${assets_token}`}
 									/>
 								)}
 							/>
