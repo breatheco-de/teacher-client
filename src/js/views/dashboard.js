@@ -399,9 +399,7 @@ export class CohortView extends React.Component {
 								path={this.props.match.path + "/new-project"}
 								render={() => (
 									<IFrameView
-										src={`https://assets.breatheco.de/apps/new-project/?email=${
-											currentCohort.slug
-										}&bc_token=${access_token}&assets_token=${assets_token}`}
+										src={`https://assets.breatheco.de/apps/new-project/?email=${email}&bc_token=${access_token}&assets_token=${assets_token}`}
 									/>
 								)}
 							/>
