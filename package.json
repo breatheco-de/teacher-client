@@ -4,6 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
+        "now-buid":"npm run build",
 		"start": "webpack-dev-server --config webpack.dev.js",
 		"build": "webpack --mode production --config webpack.prod.js",
 		"deploy": "node deploy-to-github.js"
