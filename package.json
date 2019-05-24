@@ -6,7 +6,8 @@
 	"scripts": {
 		"start": "webpack-dev-server --config webpack.dev.js",
 		"build": "webpack --mode production --config webpack.prod.js",
-		"deploy": "node deploy-to-github.js"
+		"deploy": "node deploy-to-github.js",
+        "now-build":"webpack --mode production --config webpack.prod.js"
 	},
 	"author": [
 		"Alejandro Sanchez"
