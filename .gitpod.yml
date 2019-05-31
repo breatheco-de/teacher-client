@@ -1,7 +1,9 @@
 ports:
 - port: 8080
   onOpen: open-preview
-  
+
 tasks:
-- init: npm install;
+- init: >
+    npm install;
+    npm i now -g;
   command: npm run start;
