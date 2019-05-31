@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "alias": "teacher.breatheco.de",
   "name": "TEACHER-CLIENT",
   "builds": [
     {
