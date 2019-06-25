@@ -54,7 +54,7 @@
 		]
 	},
 	"dependencies": {
-		"@breathecode/ui-components": "^1.0.84",
+		"@breathecode/ui-components": "^1.1.63",
 		"bc-react-notifier": "^1.1.6",
 		"bc-react-session": "^1.5.2",
 		"bootstrap": "^4.3.1",

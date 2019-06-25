@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 //include your index.scss file into the bundle
+import "@breathecode/ui-components/dist/main.css";
 import "../styles/index.scss";
 
 //import your own components

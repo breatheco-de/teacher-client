@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Switch, Link } from "react-router-dom";
 import { PrivateRoute } from "bc-react-session";
 import { ChooseCohort, CohortView, RedirectView } from "./views/dashboard";
 import withCohortContext from "./contexts/cohort-context";
-import { LoadBar } from "@breathecode/ui-components";
+import LoadBar from "./components/load-bar/index";
 import { Notifier } from "bc-react-notifier";
 import { LoginView, ForgotView } from "./views/auth";
 //create your first component

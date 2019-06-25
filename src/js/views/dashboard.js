@@ -85,11 +85,17 @@ const Menu = withRouter(({ onClick, mode, cohort, match, history }) => {
 				<MenuItem label="Syllabus" iconName="graduationCap" collapsed={false} onClick={() => onClick({ mode: "syllabus" })} />
 				<MenuItem
 					label="Attendancy"
-					iconName="graduationCap"
+					iconName="graduate"
 					collapsed={false}
 					onClick={() => onClick({ mode: "home", path: `/cohort/${cohort}/attendance` })}
 				/>
-				<MenuItem label="Replits" iconName="code" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/replits`)} />
+				<MenuItem label="Replit Links" iconName="list" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/replits`)} />
+				<MenuItem
+					label="Assignments"
+					iconName="calendarCheck"
+					collapsed={false}
+					onClick={() => history.push(`/cohort/${cohort}/assignments`)}
+				/>
 				<MenuItem label="Code" iconName="code" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/new-project`)} />
 				{currentCohort.streaming && (
 					<MenuItem label="Live Class" iconName="youtube" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/live`)} />
@@ -406,7 +412,20 @@ export class CohortView extends React.Component {
 							<Route
 								exact
 								path={this.props.match.path + "/live"}
-								render={() => <IFrameView src={`https://assets.breatheco.de/apps/streaming-qr?cohort=${currentCohort.slug}`} />}
+								render={() => (
+									<IFrameView
+										src={`https://assets.breatheco.de/apps/streaming-qr?cohort=${currentCohort.slug}&bc_token=${access_token}`}
+									/>
+								)}
+							/>
+							<Route
+								exact
+								path={this.props.match.path + "/assignments"}
+								render={() => (
+									<IFrameView
+										src={`https://assets.breatheco.de/apps/assignment?cohort=${currentCohort.id}&bc_token=${access_token}`}
+									/>
+								)}
 							/>
 							<Route
 								exact
