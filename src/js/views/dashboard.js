@@ -44,7 +44,9 @@ export const ChooseCohort = properties => {
 								className="btn btn-light ml-3 float-right"
 								onClick={() => {
 									BC.streaming()
-										.getCohort(cohort.slug)
+										.getCohort(
+											cohort.streaming_slug && typeof cohort.streaming_slug == "string" ? cohort.streaming_slug : cohort.slug
+										)
 										.then(streaming => {
 											cohort.streaming = streaming;
 											Session.setPayload({
@@ -96,7 +98,7 @@ const Menu = withRouter(({ onClick, mode, cohort, match, history }) => {
 					collapsed={false}
 					onClick={() => history.push(`/cohort/${cohort}/assignments`)}
 				/>
-				<MenuItem label="Code" iconName="code" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/new-project`)} />
+				<MenuItem label="Code new project" iconName="code" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/new-project`)} />
 				{currentCohort.streaming && (
 					<MenuItem label="Live Class" iconName="youtube" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/live`)} />
 				)}
