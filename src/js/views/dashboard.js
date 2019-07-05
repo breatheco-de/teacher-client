@@ -416,7 +416,11 @@ export class CohortView extends React.Component {
 								path={this.props.match.path + "/live"}
 								render={() => (
 									<IFrameView
-										src={`https://assets.breatheco.de/apps/streaming-qr?cohort=${currentCohort.slug}&bc_token=${access_token}`}
+										src={`https://assets.breatheco.de/apps/streaming-qr?cohort=${
+											currentCohort.streaming_slug && typeof currentCohort.streaming_slug == "string"
+												? currentCohort.streaming_slug
+												: currentCohort.slug
+										}&bc_token=${access_token}`}
 									/>
 								)}
 							/>
