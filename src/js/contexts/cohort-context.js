@@ -16,20 +16,22 @@ const getState = ({ getStore, setStore }) => {
 			saveCohortAttendancy: (cohortSlug, attendancy) => {
 				const { students } = getStore();
 				const { currentCohort } = Session.getPayload();
-				BC.activity()
-					.addBulk(
-						students.map(stud => {
-							const attended = attendancy.find(a => a.id === stud.id);
-							return {
-								id: stud.id,
-								email: stud.email,
-								slug: typeof attended === "undefined" || !attended ? "classroom_unattendance" : "classroom_attendance",
-								data: `{ "cohort": "${cohortSlug}", "day": "${currentCohort.current_day}"}`
-							};
-						})
-					)
-					.then(resp => Notify.success("The Attendancy has been reported"))
-					.catch(err => Notify.error("There was an error reporting the attendancy"));
+				if (attendancy.length == 0) Notify.error("No attendancy to report");
+				else
+					BC.activity()
+						.addBulk(
+							students.map(stud => {
+								const attended = attendancy.find(a => a.id === stud.id);
+								return {
+									id: stud.id,
+									email: stud.email,
+									slug: typeof attended === "undefined" || !attended ? "classroom_unattendance" : "classroom_attendance",
+									data: `{ "cohort": "${cohortSlug}", "day": "${currentCohort.current_day}"}`
+								};
+							})
+						)
+						.then(resp => Notify.success("The Attendancy has been reported"))
+						.catch(err => Notify.error("There was an error reporting the attendancy"));
 			}
 		}
 	};

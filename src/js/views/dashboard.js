@@ -200,7 +200,7 @@ class AttendancyView extends React.Component {
 							type="primary"
 							className="w-100 mt-4"
 							label="Send Attendancy Report"
-							onClick={() => actions.saveCohortAttendancy(this.state.currentCohort.profile_slug, this.state.rsvp)}
+							onClick={() => actions.saveCohortAttendancy(this.state.currentCohort.slug, this.state.rsvp)}
 						/>
 					</div>
 				)}

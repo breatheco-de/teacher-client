@@ -1,3 +1,4 @@
+import { setLoading } from "../components/load-bar/index";
 /* global fetch, localStorage, window */
 class Wrapper {
 	constructor() {
@@ -27,6 +28,7 @@ class Wrapper {
 						this.isPending = true;
 						if (typeof this.options.onLoading == "function") this.options.onLoading(this.isPending);
 					}
+					setLoading(true);
 					return true;
 				}
 
@@ -34,6 +36,7 @@ class Wrapper {
 			this.isPending = false;
 			if (typeof this.options.onLoading == "function") this.options.onLoading(this.isPending);
 		}
+		setLoading(false);
 		return false;
 	}
 	_logError(error) {
