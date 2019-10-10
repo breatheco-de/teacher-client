@@ -235,6 +235,7 @@ class DayView extends React.Component {
 		}
 	}
 	render() {
+		const { currentCohort, bc_id, access_token, assets_token } = Session.getPayload();
 		const { match } = this.props;
 		return (
 			<CohortContext.Consumer>
@@ -293,7 +294,9 @@ class DayView extends React.Component {
 										<DropLink
 											dropdown={day["replits"].map(r => ({
 												label: r.title,
-												url: `https://assets.breatheco.de/apps/replit/?r=${r.slug}`
+												url: `https://assets.breatheco.de/apps/replit/?r=${r.slug}&c=${
+													currentCohort.slug
+												}&assets_token=${assets_token}`
 											}))}
 											onSelect={opt => window.open(opt.url)}>
 											Replits
