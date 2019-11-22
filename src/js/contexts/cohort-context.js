@@ -25,6 +25,9 @@ const getState = ({ getStore, setStore }) => {
 								return {
 									id: stud.id,
 									email: stud.email,
+									user_agent: "bc/teacher",
+									cohort: cohortSlug,
+									day: currentCohort.current_day.toString(),
 									slug: typeof attended === "undefined" || !attended ? "classroom_unattendance" : "classroom_attendance",
 									data: `{ "cohort": "${cohortSlug}", "day": "${currentCohort.current_day}"}`
 								};
