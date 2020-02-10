@@ -3,9 +3,9 @@ import { setLoading } from "../components/load-bar/index";
 class Wrapper {
 	constructor() {
 		this.options = {
-			assetsPath: typeof process != "undefined" ? process.env.ASSETS_URL + "/apis" : null,
-			apiPath: typeof process != "undefined" ? process.env.API_URL : null,
-			_debug: typeof process != "undefined" ? process.env.DEBUG.toLowerCase() == "true" : false,
+			assetsPath: typeof process !== "undefined" ? process.env.ASSETS_URL + "/apis" : null,
+			apiPath: typeof process !== "undefined" ? process.env.API_URL : null,
+			_debug: typeof process !== "undefined" && typeof process.env.DEBUG !== "undefined" ? process.env.DEBUG.toLowerCase() == "true" : false,
 			getToken: (type = "api") => {
 				return null;
 			},
