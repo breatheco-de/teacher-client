@@ -214,7 +214,8 @@ class DayView extends React.Component {
 		super();
 		this.state = {
 			instructions: null,
-			day: null
+			day: null,
+			errorLoadingSyllabus: false
 		};
 		this.loading = false;
 	}
@@ -223,14 +224,19 @@ class DayView extends React.Component {
 		const { currentCohort } = Session.getPayload();
 		if (typeof currentCohort.profile_slug !== "undefined" && !this.loading) {
 			this.loading = true;
-			fetchInstructions(currentCohort.profile_slug, day.dayNumber)
+			const full_slug =
+				currentCohort.syllabus_slug && typeof currentCohort.syllabus_slug !== "undefined" && currentCohort.syllabus_slug !== ""
+					? currentCohort.syllabus_slug
+					: currentCohort.profile_slug;
+			const [syllabus, version] = full_slug.split(".");
+			fetchInstructions(syllabus, day.dayNumber, version)
 				.then(instructions => {
 					this.loading = false;
 					this.setState({ instructions, day });
 				})
 				.catch(e => {
 					this.loading = false;
-					this.setState({ instructions: "# ☢ There was a problem loading this day" });
+					this.setState({ instructions: "# ☢ There was a problem loading this day", errorLoadingSyllabus: true });
 				});
 		}
 	}
@@ -242,7 +248,8 @@ class DayView extends React.Component {
 				{({ store }) => {
 					const day = store.syllabus.find(d => d.dayNumber == match.params.day_number);
 					if (typeof day == "undefined") return <Loading />;
-					if (day && (!this.state.day || day.dayNumber !== this.state.day.dayNumber)) this.loadInstructions(day);
+					if (day && (!this.state.day || day.dayNumber !== this.state.day.dayNumber) && !this.state.errorLoadingSyllabus)
+						this.loadInstructions(day);
 					return (
 						<div className="dayview p-0 pl-3">
 							<div className="description">

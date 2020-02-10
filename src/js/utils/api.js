@@ -187,14 +187,14 @@ class Wrapper {
 	syllabus() {
 		let url = this.options.assetsPath + "/syllabus";
 		return {
-			get: slug => {
+			get: (slug, version = "1") => {
 				if (!slug) throw new Error("Missing slug");
-				else return this.get(url + "/" + slug);
+				else return this.get(url + "/" + slug + "?v=" + version);
 			},
-			getInstructions: (slug = null, dayNumber = null) => {
+			getInstructions: (slug = null, dayNumber = null, version = "1") => {
 				if (!slug) throw new Error("Missing slug");
 				if (!dayNumber) throw new Error("Missing slug");
-				else return this.get(url + `/${slug}/day/${dayNumber}/instructions`, null, false);
+				else return this.get(url + `/${slug}/day/${dayNumber}/instructions?v=${version}`, null, false);
 			}
 		};
 	}

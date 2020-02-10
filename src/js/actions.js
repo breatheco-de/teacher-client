@@ -67,9 +67,9 @@ export const remind = email => {
 		});
 };
 
-export const fetchInstructions = (slug, dayNumber) => {
+export const fetchInstructions = (slug, dayNumber, version = "1") => {
 	return BC.syllabus()
-		.getInstructions(slug, dayNumber)
+		.getInstructions(slug, dayNumber, version)
 		.then(data => {
 			return data;
 		});
