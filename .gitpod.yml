@@ -6,4 +6,6 @@ tasks:
 - init: >
     npm install;
     npm i now -g;
-  command: npm run start;
+  command: >
+    cp ./.env.example ./.env;
+    npm run start;

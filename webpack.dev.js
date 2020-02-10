@@ -13,7 +13,6 @@ module.exports = merge(common, {
     historyApiFallback: true
   },
   plugins: [
-    new Dotenv({ path: './.env.dev'}),
     new webpack.HotModuleReplacementPlugin(),
     new PrettierPlugin({
       parser: "babylon",

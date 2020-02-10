@@ -14,9 +14,5 @@ module.exports = merge(common, {
         path: path.resolve(__dirname, 'public'),
         publicPath: path.resolve(__dirname, '/')
     },
-    plugins: [
-        new Dotenv({
-            path: './.env.prod'
-        })
-    ]
+    plugins: []
 })
