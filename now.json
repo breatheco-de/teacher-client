@@ -9,7 +9,13 @@
       "config": { "distDir": "public" }
     }
   ],
-
+  "build": {
+    "env": {
+        "LOGO_URL": "@logo_url",
+        "API_URL": "@api_url",
+        "ASSETS_URL": "@assets_url"
+    }
+  },
   "routes": [
       {
         "src":"/(.*).ico",

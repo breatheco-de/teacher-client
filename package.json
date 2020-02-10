@@ -12,9 +12,7 @@
 		"deploy": "node deploy-to-github.js",
 		"now-build": "webpack --mode production --config webpack.prod.js"
 	},
-	"author": [
-		"Alejandro Sanchez"
-	],
+	"author": "Alejandro Sanchez",
 	"license": "ISC",
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
