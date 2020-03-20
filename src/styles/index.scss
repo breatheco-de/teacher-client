@@ -4,6 +4,9 @@
 @import '~bootstrap/dist/css/bootstrap.css';
 @import 'to-delete';
 
+.pointer:hover{
+    cursor: pointer;
+}
 .bc-popover{
     background: white;
     border: 2px solid var(--color-grey-200);

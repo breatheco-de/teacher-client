@@ -53,6 +53,6 @@ module.exports = {
         favicon: '4geeks.ico',
         template: 'template.html'
     }),
-    new Dotenv({ path: './.env', systemvars: true })
+    new Dotenv({ path: './.env', systemvars: true, safe: true })
   ]
 };

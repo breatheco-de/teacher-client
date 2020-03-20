@@ -139,6 +139,7 @@ class AttendancyView extends React.Component {
 	componentDidMount() {
 		const { currentCohort } = Session.getPayload();
 		this.setState({ currentCohort, currentDay: currentCohort.current_day });
+		//https://attendancy.breatheco.de/?cohort_slug=miami-downtown-vi&bc_token=&assets_token=
 	}
 	render() {
 		if (!this.state.currentCohort) return <Loading show={true} />;
@@ -181,7 +182,12 @@ class AttendancyView extends React.Component {
 								</span>
 							)}
 						</h1>
-						<ul className="m-0 p-0">
+						<span
+							className="a text-primary pointer"
+							onClick={() => this.props.history.push(`/cohort/${this.state.currentCohort.slug}/attendance/history`)}>
+							Review previous attendancy
+						</span>
+						<ul className="m-5 p-0">
 							{store.students.map((s, i) => (
 								<li key={i}>
 									<CheckBox
@@ -208,6 +214,10 @@ class AttendancyView extends React.Component {
 		);
 	}
 }
+AttendancyView.propTypes = {
+	history: PropTypes.object,
+	match: PropTypes.object
+};
 
 class DayView extends React.Component {
 	constructor() {
@@ -401,6 +411,17 @@ export class CohortView extends React.Component {
 						<Switch>
 							<Route exact path={this.props.match.path + "/attendance"} component={AttendancyView} />
 							<Route exact path={this.props.match.path + "/d/:day_number"} component={DayView} />
+							<Route
+								exact
+								path={this.props.match.path + "/attendance/history"}
+								render={() => (
+									<IFrameView
+										src={`https://attendancy.breatheco.de/?cohort_slug=${
+											currentCohort.slug
+										}&teacher=${bc_id}&bc_token=${access_token}&assets_token=${assets_token}`}
+									/>
+								)}
+							/>
 							<Route
 								exact
 								path={this.props.match.path + "/replits"}
