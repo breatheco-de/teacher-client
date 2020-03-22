@@ -64,23 +64,20 @@ const Store = PassedComponent => {
 				.get(syllabus, version)
 				.then(data => {
 					let dayNumber = 1;
-					const syllabus = [].concat.apply(
-						[],
-						data.weeks.map(week =>
-							week.days.filter(d => d !== null).map(d => {
-								d.isWeekend = d.label.toLowerCase().includes("weekend");
-								d.dayNumber = null;
-								if (!d.isWeekend) {
-									if (d.partial == "am") d.dayNumber = dayNumber + d.partial;
-									else {
-										d.dayNumber = dayNumber + (d.partial || "");
-										dayNumber++;
-									}
-								}
-								return d;
-							})
-						)
-					);
+
+					if (Array.isArray(data.weeks)) data.days = [].concat.apply([], data.weeks.map(week => week.days));
+					const syllabus = data.days.filter(d => d !== null).map(d => {
+						d.isWeekend = d.label.toLowerCase().includes("weekend");
+						d.dayNumber = null;
+						if (!d.isWeekend) {
+							if (d.partial == "am") d.dayNumber = dayNumber + d.partial;
+							else {
+								d.dayNumber = dayNumber + (d.partial || "");
+								dayNumber++;
+							}
+						}
+						return d;
+					});
 					this.setState({
 						store: Object.assign(this.state.store, { syllabus })
 					});
