@@ -487,8 +487,12 @@ export class CohortView extends React.Component {
 												<a
 													target="_blank"
 													rel="noopener noreferrer"
-													href="https://docs.google.com/document/d/1EkyC3aF9Ga0A5chiukH8MeWVGc1XBaknvaaxmr8rUSw/edit">
-													🎖The Academic department guidelines
+													href={
+														currentCohort.syllabus_slug && currentCohort.syllabus_slug.indexOf("desde-casa") > -1
+															? "https://docs.google.com/document/d/1iGFOUClYKr_I7T6ID4X3Qrs-5gevBfZNVR23l0cBsaE"
+															: "https://docs.google.com/document/d/1EkyC3aF9Ga0A5chiukH8MeWVGc1XBaknvaaxmr8rUSw/edit"
+													}>
+													🎖 Teacher Guidelines and best practices
 												</a>
 											</li>
 											<li>
@@ -507,6 +511,14 @@ export class CohortView extends React.Component {
 												</a>
 											</li>
 										</ul>
+										<p className="mt-3 alert alert-warning">
+											<strong> ⚠️ Important</strong> All intellectual property rights are reserved. You may access all{" "}
+											{"BreatheCode's"} content for your own personal use subjected to restrictions set in{" "}
+											<a href="https://breatheco.de/terms-and-conditions/" target="_blank" rel="noopener noreferrer">
+												these terms and conditions
+											</a>
+											.
+										</p>
 									</div>
 								)}
 							/>
