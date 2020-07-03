@@ -91,7 +91,6 @@ const Menu = withRouter(({ onClick, mode, cohort, match, history }) => {
 					collapsed={false}
 					onClick={() => onClick({ mode: "home", path: `/cohort/${cohort}/attendance` })}
 				/>
-				<MenuItem label="Replit Links" iconName="list" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/replits`)} />
 				<MenuItem
 					label="Assignments"
 					iconName="calendarCheck"
@@ -469,15 +468,6 @@ export class CohortView extends React.Component {
 								path={this.props.match.path}
 								render={() => (
 									<div>
-										{!store.replits && (
-											<div className="alert alert-danger">
-												You need to set the cohort replits before continuing with the class.
-												<Button onClick={() => this.props.history.push(`/cohort/${currentCohort.slug}/replits`)}>
-													Click here to upload the replit links
-												</Button>
-												.
-											</div>
-										)}
 										<h1>
 											{currentCohort.name} <span className="badge badge-secondary">day {currentCohort.current_day}</span> 🤓
 										</h1>
