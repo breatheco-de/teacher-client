@@ -491,7 +491,7 @@ export class CohortView extends React.Component {
 												</a>
 											</li>
 											<li>
-												<a target="_blank" rel="noopener noreferrer" href="https://content.breatheco.de/lesson/">
+												<a target="_blank" rel="noopener noreferrer" href="https://content.breatheco.de/">
 													📖 Ugly list of all the lessons at the academy
 												</a>
 											</li>
