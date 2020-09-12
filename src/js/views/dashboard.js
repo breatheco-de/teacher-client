@@ -477,11 +477,7 @@ export class CohortView extends React.Component {
 												<a
 													target="_blank"
 													rel="noopener noreferrer"
-													href={
-														currentCohort.syllabus_slug && currentCohort.syllabus_slug.indexOf("desde-casa") > -1
-															? "https://docs.google.com/document/d/1iGFOUClYKr_I7T6ID4X3Qrs-5gevBfZNVR23l0cBsaE"
-															: "https://docs.google.com/document/d/1EkyC3aF9Ga0A5chiukH8MeWVGc1XBaknvaaxmr8rUSw/edit"
-													}>
+						href="https://www.notion.so/4geeksacademy/Mentor-training-433451eb9dac4dc680b7c5dae1796519">
 													🎖 Teacher Guidelines and best practices
 												</a>
 											</li>
