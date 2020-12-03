@@ -4,20 +4,7 @@ import { PropTypes } from "prop-types";
 import BC from "../utils/api.js";
 import { logout, fetchInstructions, updateCohortDay } from "../actions.js";
 import IFrameView from "./iframe.js";
-import {
-	List,
-	Panel,
-	Anchor,
-	Sidebar,
-	MenuItem,
-	TimeLine,
-	CheckBox,
-	Button,
-	DropLink,
-	Loading,
-	MarkdownParser,
-	Icon
-} from "@breathecode/ui-components";
+import { List, Panel, Anchor, Sidebar, MenuItem, TimeLine, Button, DropLink, Loading, MarkdownParser, Icon } from "@breathecode/ui-components";
 import { Session } from "bc-react-session";
 import { CohortContext } from "../contexts/cohort-context";
 import Popover from "../components/Popover";
@@ -125,6 +112,18 @@ Menu.propTypes = {
 	mode: PropTypes.string.isRequired,
 	onClick: PropTypes.func.isRequired
 };
+
+const CheckBox = ({ checked, onClick, label }) => (
+	<div className="d-flex" onClick={() => onClick && onClick(!checked)}>
+		<div>{checked ? <i className="far fa-check-square mr-2" /> : <i className="far fa-square mr-2" />}</div>
+		<div>{label}</div>
+	</div>
+);
+CheckBox.propTypes = {
+	checked: PropTypes.bool.isRequired,
+	onClick: PropTypes.func.isRequired,
+	label: PropTypes.string
+};
 class AttendancyView extends React.Component {
 	constructor() {
 		super();
@@ -187,19 +186,20 @@ class AttendancyView extends React.Component {
 							Review previous attendancy
 						</span>
 						<ul className="m-5 p-0">
-							{store.students.map((s, i) => (
-								<li key={i}>
-									<CheckBox
-										label={`${s.first_name} ${s.last_name ? s.last_name : ""}`}
-										checked={this.state.rsvp.find(std => std.id === s.id) || false}
-										onClick={checked =>
-											checked
-												? this.setState({ rsvp: this.state.rsvp.concat([s]) })
-												: this.setState({ rsvp: this.state.rsvp.filter(sdt => sdt !== s.id) })
-										}
-									/>
-								</li>
-							))}
+							{store.students.map((s, i) => {
+								console.log(this.state.rsvp);
+								const checked = this.state.rsvp.find(std => std.id === s.id) || false;
+								const rsvp = this.state.rsvp.filter(sdt => sdt.id != s.id);
+								return (
+									<li key={i}>
+										<CheckBox
+											label={`${s.first_name} ${s.last_name ? s.last_name : ""}`}
+											checked={checked}
+											onClick={isCheck => this.setState({ rsvp: isCheck ? rsvp.concat(s) : rsvp })}
+										/>
+									</li>
+								);
+							})}
 						</ul>
 						<Button
 							type="primary"
@@ -423,17 +423,6 @@ export class CohortView extends React.Component {
 							/>
 							<Route
 								exact
-								path={this.props.match.path + "/replits"}
-								render={() => (
-									<IFrameView
-										src={`https://assets.breatheco.de/apps/replit-maker/?cohort=${
-											currentCohort.slug
-										}&teacher=${bc_id}&bc_token=${access_token}&assets_token=${assets_token}`}
-									/>
-								)}
-							/>
-							<Route
-								exact
 								path={this.props.match.path + "/new-project"}
 								render={() => (
 									<IFrameView
@@ -458,9 +447,7 @@ export class CohortView extends React.Component {
 								exact
 								path={this.props.match.path + "/assignments"}
 								render={() => (
-									<IFrameView
-										src={`https://assets.breatheco.de/apps/assignment?cohort=${currentCohort.id}&bc_token=${access_token}`}
-									/>
+									<IFrameView src={`https://assignments.breatheco.de/?cohort=${currentCohort.id}&bc_token=${access_token}`} />
 								)}
 							/>
 							<Route
@@ -477,7 +464,7 @@ export class CohortView extends React.Component {
 												<a
 													target="_blank"
 													rel="noopener noreferrer"
-						href="https://www.notion.so/4geeksacademy/Mentor-training-433451eb9dac4dc680b7c5dae1796519">
+													href="https://www.notion.so/4geeksacademy/Mentor-training-433451eb9dac4dc680b7c5dae1796519">
 													🎖 Teacher Guidelines and best practices
 												</a>
 											</li>
