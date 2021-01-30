@@ -55,10 +55,7 @@ const Store = PassedComponent => {
 
 		componentDidMount() {
 			const { currentCohort } = Session.getPayload();
-			const full_slug =
-				currentCohort.syllabus_slug && typeof currentCohort.syllabus_slug !== "undefined" && currentCohort.syllabus_slug !== ""
-					? currentCohort.syllabus_slug
-					: currentCohort.profile_slug;
+			const full_slug = currentCohort.certificate.slug;
 			const [syllabus, version] = full_slug.split(".");
 			BC.syllabus()
 				.get(syllabus, version)

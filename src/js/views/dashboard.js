@@ -20,39 +20,26 @@ export const RedirectView = properties => {
 export const ChooseCohort = properties => {
 	const payload = Session.getPayload();
 	if (typeof payload.cohorts == "undefined") return <Redirect to="/login" />;
+
 	return (
 		<Panel className="choose-view" style={{ padding: "10px" }} zDepth={1}>
-			<div className="col-10 col-sm-6 mx-auto pt-5">
+			<div className="col-10 col-md-8 mx-auto pt-5">
 				<h3>Please choose a course to launch:</h3>
 				<List className="courses">
-					{payload.cohorts.map((cohort, i) => (
+					{payload.cohorts.filter(c => c.role != "STUDENT").map((c, i) => (
 						<li key={i}>
 							<button
 								className="btn btn-light ml-3 float-right"
 								onClick={() => {
-									BC.streaming()
-										.getCohort(
-											cohort.streaming_slug && typeof cohort.streaming_slug == "string" ? cohort.streaming_slug : cohort.slug
-										)
-										.then(streaming => {
-											cohort.streaming = streaming;
-											Session.setPayload({
-												currentCohort: cohort
-											});
-											properties.history.push("/cohort/" + cohort.slug);
-										})
-										.catch(() => {
-											cohort.streaming = null;
-											Session.setPayload({
-												currentCohort: cohort
-											});
-											properties.history.push("/cohort/" + cohort.slug);
-										});
+									Session.setPayload({
+										currentCohort: c.cohort
+									});
+									properties.history.push("/cohort/" + c.cohort.slug);
 								}}>
 								<i className="fas fa-external-link-alt" /> launch this course
 							</button>
-							<span className="cohort-name h4">{cohort.profile_slug}</span>
-							<p className="cohort-description m-0">Cohort: {cohort.name}</p>
+							<span className="cohort-name h4">{c.cohort.certificate.name}</span>
+							<p className="cohort-description m-0">Cohort: {c.cohort.name}</p>
 						</li>
 					))}
 				</List>
@@ -234,8 +221,8 @@ class DayView extends React.Component {
 		if (typeof currentCohort.profile_slug !== "undefined" && !this.loading) {
 			this.loading = true;
 			const full_slug =
-				currentCohort.syllabus_slug && typeof currentCohort.syllabus_slug !== "undefined" && currentCohort.syllabus_slug !== ""
-					? currentCohort.syllabus_slug
+				currentCohort.certificate.slug && typeof currentCohort.certificate.slug !== "undefined" && currentCohort.certificate.slug !== ""
+					? currentCohort.certificate.slug
 					: currentCohort.profile_slug;
 			const [syllabus, version] = full_slug.split(".");
 			fetchInstructions(syllabus, day.dayNumber, version)
