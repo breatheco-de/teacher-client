@@ -38,7 +38,7 @@ class Wrapper {
 		return false;
 	}
 	_logError(error) {
-		if (this.options._debug) console.error(error);
+		if (this.options._debug) console.error("Fetch error: ", error);
 	}
 	setOptions(options) {
 		this.options = Object.assign(this.options, options);
@@ -67,6 +67,7 @@ class Wrapper {
 			delete args.token;
 		} else if (token && !path.includes("/login")) opts.headers["Authorization"] = token;
 
+		if (!path.includes("?")) path += "?";
 		if (method === "get") path += this.serialize(args).toStr();
 		else {
 			if (method == "put" && !args) throw new Error("Missing request body");
@@ -86,21 +87,21 @@ class Wrapper {
 					this.pending[method][path] = false;
 					//recalculate to check if it there is pending requests
 					this.calculatePending();
-
-					if (resp.ok) return resp.json();
+					if (resp.status >= 200 && resp.status < 400) return resp.json();
 					else {
 						this._logError(resp);
 						if (resp.status == 403) reject({ msg: "Invalid username or password", code: 403 });
 						else if (resp.status == 401) {
 							reject({ msg: "Unauthorized", code: 401 });
 							if (this.options.onLogout) this.options.onLogout();
-						} else if (resp.status == 400)
-							resp.json()
-								.then(err => reject({ msg: err.msg || err, code: 400 }))
+						} else if (resp.status == 400) {
+							return resp
+								.json()
+								.then(err => reject({ msg: this.parseError(err), code: 400 }))
 								.catch(() => reject({ msg: "Invalid Argument", code: 400 }));
-						else reject({ msg: "There was an error, try again later", code: 500 });
+						} else reject({ msg: "There was an error, try again later", code: 500 });
 					}
-					return false;
+					throw new Error("There was a problem processing the request");
 				})
 				.then(json => {
 					if (!json) throw new Error("There was a problem processing the request");
@@ -116,6 +117,10 @@ class Wrapper {
 					reject(error.message);
 				});
 		});
+	}
+	parseError(obj) {
+		if (Array.isArray(obj.non_field_errors)) return obj.non_field_errors[0];
+		else return obj.detail || obj.details;
 	}
 	_encodeKeys(obj) {
 		for (let key in obj) {
@@ -276,7 +281,7 @@ class Wrapper {
 		};
 	}
 	cohort() {
-		let url = this.options.apiPath;
+		let url = this.options.apiPath + "/v1/admissions/academy/cohort";
 		return {
 			all: () => {
 				return this.get(url + "/cohorts/");
@@ -298,6 +303,9 @@ class Wrapper {
 					return { student_id: id };
 				});
 				return this.post(url + "/student/cohort/" + cohortId, studentsArray);
+			},
+			getStudents: cohortId => {
+				return this.get(url + "/user?cohorts=" + cohortId);
 			},
 			removeStudents: (cohortId, studentsArray) => {
 				studentsArray = studentsArray.map(id => {
@@ -395,6 +403,9 @@ class Wrapper {
 		return {
 			addStudentActivity: (id, { user_agent, cohort, day, slug, data }) => {
 				return this.post(url + "/activity/user/" + id, { user_agent, cohort, day, slug, data });
+			},
+			addBulk: activities => {
+				return this.post(url + "/activity/user/bulk", activities);
 			}
 		};
 	}

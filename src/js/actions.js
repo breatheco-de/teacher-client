@@ -18,7 +18,7 @@ BC.setOptions({
 	sessionAcademy: () => {
 		const session = Session.get();
 		const user = session.payload;
-		if (user.currentCohort && !Array.isArray(user.currentCohort)) return user.currentCohort.academy.id;
+		if (user.currentCohort && !Array.isArray(user.currentCohort)) return user.currentCohort.cohort.academy.id;
 	},
 	onLoading: setLoading,
 	onLogout: () => logout()
@@ -46,8 +46,7 @@ export const login = async (username, password, history) => {
 	};
 	Session.start({ payload: user, expiration: 3600 * 24 });
 
-	if (!data.profile || typeof data.profile == "undefined") history.push("/profile");
-	else history.push("/");
+	history.push("/");
 };
 
 export const autoLogin = async token => {
