@@ -232,6 +232,10 @@ class DayView extends React.Component {
 	loadInstructions(day) {
 		const { currentCohort } = Session.getPayload();
 		if (typeof currentCohort.profile_slug !== "undefined" && !this.loading) {
+			if (day.extended_instructions) {
+				this.setState({ instructions: day.extended_instructions, day });
+				return true;
+			}
 			this.loading = true;
 			const full_slug =
 				currentCohort.syllabus_slug && typeof currentCohort.syllabus_slug !== "undefined" && currentCohort.syllabus_slug !== ""
