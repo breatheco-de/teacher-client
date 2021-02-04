@@ -1,21 +1,4 @@
 {
-  "version": 2,
-  "alias": "teacher.breatheco.de",
-  "name": "TEACHER-CLIENT",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@now/static-build",
-      "config": { "distDir": "public" }
-    }
-  ],
-  "build": {
-    "env": {
-        "LOGO_URL": "@logo_url",
-        "API_URL": "@api_url",
-        "ASSETS_URL": "@assets_url"
-    }
-  },
   "routes": [
       {
         "src":"/(.*).ico",
