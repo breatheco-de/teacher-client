@@ -12,47 +12,39 @@ import Popover from "../components/Popover";
 export const RedirectView = properties => {
 	const { payload, active } = Session.get();
 	if (!active || typeof payload.cohorts == "undefined") return <Redirect to="/login" />;
-	else if (typeof payload.currentCohort == "undefined" || !payload.currentCohort || payload.currentCohort.length > 1)
+	else if (
+		typeof payload.currentCohort == "undefined" ||
+		!payload.currentCohort ||
+		payload.currentCohort.length == 0 ||
+		payload.currentCohort.length > 1
+	)
 		return <Redirect to="/choose" />;
-	else return <Redirect to={`/cohort/${payload.currentCohort.slug}`} />;
+	else return <Redirect to={`/cohort/${payload.currentCohort.cohort.slug}`} />;
 };
 
 export const ChooseCohort = properties => {
 	const payload = Session.getPayload();
 	if (typeof payload.cohorts == "undefined") return <Redirect to="/login" />;
+
 	return (
 		<Panel className="choose-view" style={{ padding: "10px" }} zDepth={1}>
-			<div className="col-10 col-sm-6 mx-auto pt-5">
+			<div className="col-10 col-md-8 mx-auto pt-5">
 				<h3>Please choose a course to launch:</h3>
 				<List className="courses">
-					{payload.cohorts.map((cohort, i) => (
+					{payload.cohorts.filter(c => c.role != "STUDENT").map((c, i) => (
 						<li key={i}>
 							<button
 								className="btn btn-light ml-3 float-right"
 								onClick={() => {
-									BC.streaming()
-										.getCohort(
-											cohort.streaming_slug && typeof cohort.streaming_slug == "string" ? cohort.streaming_slug : cohort.slug
-										)
-										.then(streaming => {
-											cohort.streaming = streaming;
-											Session.setPayload({
-												currentCohort: cohort
-											});
-											properties.history.push("/cohort/" + cohort.slug);
-										})
-										.catch(() => {
-											cohort.streaming = null;
-											Session.setPayload({
-												currentCohort: cohort
-											});
-											properties.history.push("/cohort/" + cohort.slug);
-										});
+									Session.setPayload({
+										currentCohort: c
+									});
+									properties.history.push("/cohort/" + c.cohort.slug);
 								}}>
 								<i className="fas fa-external-link-alt" /> launch this course
 							</button>
-							<span className="cohort-name h4">{cohort.profile_slug}</span>
-							<p className="cohort-description m-0">Cohort: {cohort.name}</p>
+							<span className="cohort-name h4">{c.cohort.certificate.name}</span>
+							<p className="cohort-description m-0">Cohort: {c.cohort.name}</p>
 						</li>
 					))}
 				</List>
@@ -68,7 +60,7 @@ export const ChooseCohort = properties => {
 
 const Menu = withRouter(({ onClick, mode, cohort, match, history }) => {
 	if (mode == "home") {
-		const { currentCohort, bc_id, access_token, assets_token } = Session.getPayload();
+		const { currentCohort, bc_id, token } = Session.getPayload();
 		return (
 			<ul className="px-3">
 				<MenuItem label="Syllabus" iconName="graduationCap" collapsed={false} onClick={() => onClick({ mode: "syllabus" })} />
@@ -85,9 +77,6 @@ const Menu = withRouter(({ onClick, mode, cohort, match, history }) => {
 					onClick={() => history.push(`/cohort/${cohort}/assignments`)}
 				/>
 				<MenuItem label="Code new project" iconName="code" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/new-project`)} />
-				{currentCohort.streaming && (
-					<MenuItem label="Live Class" iconName="youtube" collapsed={false} onClick={() => history.push(`/cohort/${cohort}/live`)} />
-				)}
 			</ul>
 		);
 	} else if (mode == "syllabus")
@@ -136,8 +125,7 @@ class AttendancyView extends React.Component {
 	}
 	componentDidMount() {
 		const { currentCohort } = Session.getPayload();
-		this.setState({ currentCohort, currentDay: currentCohort.current_day });
-		//https://attendancy.breatheco.de/?cohort_slug=miami-downtown-vi&bc_token=&assets_token=
+		this.setState({ currentCohort, currentDay: currentCohort.cohort.current_day });
 	}
 	render() {
 		if (!this.state.currentCohort) return <Loading show={true} />;
@@ -160,7 +148,7 @@ class AttendancyView extends React.Component {
 									<div
 										className="input-group-append d-inline-block"
 										onClick={() =>
-											updateCohortDay(this.state.currentCohort.id, this.state.currentDay).then(() =>
+											updateCohortDay(this.state.currentCohort.cohort.id, this.state.currentDay).then(() =>
 												this.setState({ currentDay: this.state.currentDay, changeDay: false })
 											)
 										}>
@@ -182,18 +170,18 @@ class AttendancyView extends React.Component {
 						</h1>
 						<span
 							className="a text-primary pointer"
-							onClick={() => this.props.history.push(`/cohort/${this.state.currentCohort.slug}/attendance/history`)}>
+							onClick={() => this.props.history.push(`/cohort/${this.state.currentCohort.cohort.slug}/attendance/history`)}>
 							Review previous attendancy
 						</span>
 						<ul className="m-5 p-0">
 							{store.students.map((s, i) => {
 								console.log(this.state.rsvp);
-								const checked = this.state.rsvp.find(std => std.id === s.id) || false;
-								const rsvp = this.state.rsvp.filter(sdt => sdt.id != s.id);
+								const checked = this.state.rsvp.find(std => std.user.id === s.user.id) || false;
+								const rsvp = this.state.rsvp.filter(sdt => sdt.user.id != s.user.id);
 								return (
 									<li key={i}>
 										<CheckBox
-											label={`${s.first_name} ${s.last_name ? s.last_name : ""}`}
+											label={`${s.user.first_name} ${s.user.last_name ? s.user.last_name : ""}`}
 											checked={checked}
 											onClick={isCheck => this.setState({ rsvp: isCheck ? rsvp.concat(s) : rsvp })}
 										/>
@@ -205,7 +193,7 @@ class AttendancyView extends React.Component {
 							type="primary"
 							className="w-100 mt-4"
 							label="Send Attendancy Report"
-							onClick={() => actions.saveCohortAttendancy(this.state.currentCohort.slug, this.state.rsvp)}
+							onClick={() => actions.saveCohortAttendancy(this.state.currentCohort.cohort.slug, this.state.rsvp)}
 						/>
 					</div>
 				)}
@@ -222,47 +210,21 @@ class DayView extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			instructions: null,
 			day: null,
 			errorLoadingSyllabus: false
 		};
 		this.loading = false;
 	}
 
-	loadInstructions(day) {
-		const { currentCohort } = Session.getPayload();
-		if (typeof currentCohort.profile_slug !== "undefined" && !this.loading) {
-			if (day.extended_instructions) {
-				this.setState({ instructions: day.extended_instructions, day });
-				return true;
-			}
-			this.loading = true;
-			const full_slug =
-				currentCohort.syllabus_slug && typeof currentCohort.syllabus_slug !== "undefined" && currentCohort.syllabus_slug !== ""
-					? currentCohort.syllabus_slug
-					: currentCohort.profile_slug;
-			const [syllabus, version] = full_slug.split(".");
-			fetchInstructions(syllabus, day.dayNumber, version)
-				.then(instructions => {
-					this.loading = false;
-					this.setState({ instructions, day });
-				})
-				.catch(e => {
-					this.loading = false;
-					this.setState({ instructions: "# ☢ There was a problem loading this day", errorLoadingSyllabus: true });
-				});
-		}
-	}
 	render() {
-		const { currentCohort, bc_id, access_token, assets_token } = Session.getPayload();
+		const { currentCohort, bc_id, token } = Session.getPayload();
 		const { match } = this.props;
 		return (
 			<CohortContext.Consumer>
 				{({ store }) => {
 					const day = store.syllabus.find(d => d.dayNumber == match.params.day_number);
 					if (typeof day == "undefined") return <Loading />;
-					if (day && (!this.state.day || day.dayNumber !== this.state.day.dayNumber) && !this.state.errorLoadingSyllabus)
-						this.loadInstructions(day);
+
 					return (
 						<div className="dayview p-0 pl-3">
 							<div className="description">
@@ -270,7 +232,7 @@ class DayView extends React.Component {
 									<span className="badge badge-secondary">{day.label}</span>{" "}
 									{Array.isArray(day.technologies) && day.technologies.join(",")}
 								</h3>
-								<p>{day.instructions || day.teacher_instructions}</p>
+								<p>{day.teacher_instructions || day.instructions}</p>
 								{day.project && (
 									<p className="info-bar">
 										{day.project.instructions || day.project.url ? (
@@ -315,8 +277,8 @@ class DayView extends React.Component {
 											dropdown={day["replits"].map(r => ({
 												label: r.title,
 												url: `https://assets.breatheco.de/apps/replit/?r=${r.slug}&c=${
-													currentCohort.slug
-												}&assets_token=${assets_token}`
+													currentCohort.cohort.slug
+												}&token=${token}`
 											}))}
 											onSelect={opt => window.open(opt.url)}>
 											Replits
@@ -349,7 +311,7 @@ class DayView extends React.Component {
 								)}
 							</div>
 							<div className="instructions">
-								<MarkdownParser source={this.state.instructions} />
+								<MarkdownParser source={day.extended_instructions} />
 							</div>
 						</div>
 					);
@@ -373,7 +335,7 @@ export class CohortView extends React.Component {
 	}
 
 	render() {
-		const { currentCohort, bc_id, access_token, assets_token, email } = Session.getPayload();
+		const { currentCohort, bc_id, token, email } = Session.getPayload();
 		return (
 			<Sidebar
 				menu={() => (
@@ -411,96 +373,83 @@ export class CohortView extends React.Component {
 				}}>
 				<CohortContext.Consumer>
 					{({ store }) => (
-						<Switch>
-							<Route exact path={this.props.match.path + "/attendance"} component={AttendancyView} />
-							<Route exact path={this.props.match.path + "/d/:day_number"} component={DayView} />
-							<Route
-								exact
-								path={this.props.match.path + "/attendance/history"}
-								render={() => (
-									<IFrameView
-										src={`https://attendancy.breatheco.de/?cohort_slug=${
-											currentCohort.slug
-										}&teacher=${bc_id}&bc_token=${access_token}&assets_token=${assets_token}`}
-									/>
-								)}
-							/>
-							<Route
-								exact
-								path={this.props.match.path + "/new-project"}
-								render={() => (
-									<IFrameView
-										src={`https://assets.breatheco.de/apps/new-project/?email=${email}&bc_token=${access_token}&assets_token=${assets_token}`}
-									/>
-								)}
-							/>
-							<Route
-								exact
-								path={this.props.match.path + "/live"}
-								render={() => (
-									<IFrameView
-										src={`https://assets.breatheco.de/apps/streaming-qr?cohort=${
-											currentCohort.streaming_slug && typeof currentCohort.streaming_slug == "string"
-												? currentCohort.streaming_slug
-												: currentCohort.slug
-										}&bc_token=${access_token}`}
-									/>
-								)}
-							/>
-							<Route
-								exact
-								path={this.props.match.path + "/assignments"}
-								render={() => (
-									<IFrameView src={`https://oldassignments.breatheco.de/?cohort=${currentCohort.id}&bc_token=${access_token}`} />
-								)}
-							/>
-							<Route
-								exact
-								path={this.props.match.path}
-								render={() => (
-									<div>
-										<h1>
-											{currentCohort.name} <span className="badge badge-secondary">day {currentCohort.current_day}</span> 🤓
-										</h1>
-										<p>Here are a few extra resources you may need during your classes: </p>
-										<ul>
-											<li>
-												<a
-													target="_blank"
-													rel="noopener noreferrer"
-													href="https://www.notion.so/4geeksacademy/Mentor-training-433451eb9dac4dc680b7c5dae1796519">
-													🎖 Teacher Guidelines and best practices
+						<>
+							{store.error && <div className="alert alert-danger">{store.error.msg || store.error}</div>}
+							<Switch>
+								<Route exact path={this.props.match.path + "/attendance"} component={AttendancyView} />
+								<Route exact path={this.props.match.path + "/d/:day_number"} component={DayView} />
+								<Route
+									exact
+									path={this.props.match.path + "/attendance/history"}
+									render={() => (
+										<IFrameView
+											src={`https://attendancy.breatheco.de/?cohort_slug=${
+												currentCohort.cohort.slug
+											}&teacher=${bc_id}&token=${token}`}
+										/>
+									)}
+								/>
+								<Route
+									exact
+									path={this.props.match.path + "/new-project"}
+									render={() => <IFrameView src={`https://assets.breatheco.de/apps/new-project/?email=${email}&token=${token}`} />}
+								/>
+								<Route
+									exact
+									path={this.props.match.path + "/assignments"}
+									render={() => (
+										<IFrameView src={`https://assignments.breatheco.de/?cohort=${currentCohort.cohort.id}&token=${token}`} />
+									)}
+								/>
+								<Route
+									exact
+									path={this.props.match.path}
+									render={() => (
+										<div>
+											<h1>
+												{currentCohort.cohort.name}{" "}
+												<span className="badge badge-secondary">day {currentCohort.cohort.current_day}</span> 🤓
+											</h1>
+											<p>Here are a few extra resources you may need during your classes: </p>
+											<ul>
+												<li>
+													<a
+														target="_blank"
+														rel="noopener noreferrer"
+														href="https://www.notion.so/4geeksacademy/Mentor-training-433451eb9dac4dc680b7c5dae1796519">
+														🎖 Teacher Guidelines and best practices
+													</a>
+												</li>
+												<li>
+													<a target="_blank" rel="noopener noreferrer" href="https://projects.breatheco.de">
+														🚴‍♀️Pool of projects for the students
+													</a>
+												</li>
+												<li>
+													<a target="_blank" rel="noopener noreferrer" href="https://content.breatheco.de/">
+														📖 Ugly list of all the lessons at the academy
+													</a>
+												</li>
+												<li>
+													<a target="_blank" rel="noopener noreferrer" href="https://breatheco.de/en/assets/">
+														📃 Additional assets for the students
+													</a>
+												</li>
+											</ul>
+											<p className="mt-3 alert alert-warning">
+												<strong> ⚠️ Important</strong> All intellectual property rights are reserved. You may access all{" "}
+												{"BreatheCode's"} content for your own personal use subjected to restrictions set in{" "}
+												<a href="https://breatheco.de/terms-and-conditions/" target="_blank" rel="noopener noreferrer">
+													these terms and conditions
 												</a>
-											</li>
-											<li>
-												<a target="_blank" rel="noopener noreferrer" href="https://projects.breatheco.de">
-													🚴‍♀️Pool of projects for the students
-												</a>
-											</li>
-											<li>
-												<a target="_blank" rel="noopener noreferrer" href="https://content.breatheco.de/">
-													📖 Ugly list of all the lessons at the academy
-												</a>
-											</li>
-											<li>
-												<a target="_blank" rel="noopener noreferrer" href="https://breatheco.de/en/assets/">
-													📃 Additional assets for the students
-												</a>
-											</li>
-										</ul>
-										<p className="mt-3 alert alert-warning">
-											<strong> ⚠️ Important</strong> All intellectual property rights are reserved. You may access all{" "}
-											{"BreatheCode's"} content for your own personal use subjected to restrictions set in{" "}
-											<a href="https://breatheco.de/terms-and-conditions/" target="_blank" rel="noopener noreferrer">
-												these terms and conditions
-											</a>
-											.
-										</p>
-									</div>
-								)}
-							/>
-							<Route render={() => <h1>Not found</h1>} />
-						</Switch>
+												.
+											</p>
+										</div>
+									)}
+								/>
+								<Route render={() => <h1>Not found</h1>} />
+							</Switch>
+						</>
 					)}
 				</CohortContext.Consumer>
 			</Sidebar>

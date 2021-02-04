@@ -1,14 +1,14 @@
-import { setLoading } from "../components/load-bar/index";
 /* global fetch, localStorage, window */
 class Wrapper {
 	constructor() {
 		this.options = {
-			assetsPath: typeof process !== "undefined" ? process.env.ASSETS_URL + "/apis" : null,
-			apiPath: typeof process !== "undefined" ? process.env.API_URL : null,
-			_debug: typeof process !== "undefined" && typeof process.env.DEBUG !== "undefined" ? process.env.DEBUG.toLowerCase() == "true" : false,
+			assetsPath: typeof process != "undefined" ? process.env.ASSETS_URL + "/apis" : null,
+			apiPath: typeof process != "undefined" ? process.env.API_URL : null,
+			_debug: typeof process != "undefined" ? process.env.DEBUG : false,
 			getToken: (type = "api") => {
-				return null;
+				return type == "api" ? this.apiPath : this.assetsPath;
 			},
+			sessionAcademy: () => null,
 			onLoading: null,
 			onLogout: null
 		};
@@ -28,7 +28,6 @@ class Wrapper {
 						this.isPending = true;
 						if (typeof this.options.onLoading == "function") this.options.onLoading(this.isPending);
 					}
-					setLoading(true);
 					return true;
 				}
 
@@ -36,26 +35,39 @@ class Wrapper {
 			this.isPending = false;
 			if (typeof this.options.onLoading == "function") this.options.onLoading(this.isPending);
 		}
-		setLoading(false);
 		return false;
 	}
 	_logError(error) {
-		if (this.options._debug) console.error(error);
+		if (this.options._debug) console.error("Fetch error: ", error);
 	}
 	setOptions(options) {
 		this.options = Object.assign(this.options, options);
 	}
+	setAcademy(id) {
+		console.log("The academy ID is now ", id);
+		this.academy_id = id;
+	}
 	fetch(...args) {
 		return fetch(...args);
 	}
-	req(method, path, args, decode = true) {
-		const token = this.options.getToken(path.indexOf("//assets") == -1 ? "api" : "assets");
+	req(method, path, args) {
+		const token = this.options.getToken(path.indexOf("assets.") !== -1 || path.indexOf("f0d8e861") !== -1 ? "assets" : "api");
 		let opts = {
 			method,
-			headers: { "Content-Type": "application/json" }
+			cache: "no-cache",
+			headers: {
+				"Content-Type": "application/json"
+			}
 		};
-		if (token) opts.headers["Authorization"] = token;
 
+		if (path.indexOf("herokuapp.") !== -1) opts.headers["Academy"] = this.academy_id || this.options.sessionAcademy();
+
+		if (args && args.token != undefined && args.token != "") {
+			opts.headers["Authorization"] = "Token " + args.token;
+			delete args.token;
+		} else if (token && !path.includes("/login")) opts.headers["Authorization"] = token;
+
+		if (!path.includes("?")) path += "?";
 		if (method === "get") path += this.serialize(args).toStr();
 		else {
 			if (method == "put" && !args) throw new Error("Missing request body");
@@ -64,10 +76,7 @@ class Wrapper {
 
 		return new Promise((resolve, reject) => {
 			if (typeof this.pending[method][path] !== "undefined" && this.pending[method][path])
-				reject({
-					pending: true,
-					msg: `Request ${method}: ${path} was ignored because a previous one was already pending`
-				});
+				reject({ pending: true, msg: `Request ${method}: ${path} was ignored because a previous one was already pending` });
 			else this.pending[method][path] = true;
 
 			//recalculate to check if it there is pending requests
@@ -78,34 +87,21 @@ class Wrapper {
 					this.pending[method][path] = false;
 					//recalculate to check if it there is pending requests
 					this.calculatePending();
-
-					if (resp.status == 200) return decode ? resp.json() : resp.text();
+					if (resp.status >= 200 && resp.status < 400) return resp.json();
 					else {
 						this._logError(resp);
-						if (resp.status == 403)
-							reject({
-								msg: "Invalid username or password",
-								code: 403
-							});
+						if (resp.status == 403) reject({ msg: "Invalid username or password", code: 403 });
 						else if (resp.status == 401) {
 							reject({ msg: "Unauthorized", code: 401 });
 							if (this.options.onLogout) this.options.onLogout();
-						} else if (resp.status == 400)
-							resp.json()
-								.then(err => reject({ msg: err.msg || err, code: 400 }))
-								.catch(() =>
-									reject({
-										msg: "Invalid Argument",
-										code: 400
-									})
-								);
-						else
-							reject({
-								msg: "There was an error, try again later",
-								code: 500
-							});
+						} else if (resp.status == 400) {
+							return resp
+								.json()
+								.then(err => reject({ msg: this.parseError(err), code: 400 }))
+								.catch(() => reject({ msg: "Invalid Argument", code: 400 }));
+						} else reject({ msg: "There was an error, try again later", code: 500 });
 					}
-					return false;
+					throw new Error("There was a problem processing the request");
 				})
 				.then(json => {
 					if (!json) throw new Error("There was a problem processing the request");
@@ -121,6 +117,10 @@ class Wrapper {
 					reject(error.message);
 				});
 		});
+	}
+	parseError(obj) {
+		if (Array.isArray(obj.non_field_errors)) return obj.non_field_errors[0];
+		else return obj.detail || obj.details;
 	}
 	_encodeKeys(obj) {
 		for (let key in obj) {
@@ -174,41 +174,37 @@ class Wrapper {
 	}
 
 	credentials() {
-		let url = this.options.assetsPath + "/credentials";
+		let url = this.options.apiPath + "/v1/auth";
 		return {
-			autenticate: (username, password) => {
-				return this.post(url + "/auth", { username, password });
-			},
-			remind: username => {
-				return this.post(url + "/remind/" + encodeURIComponent(username), { username });
+			autenticate: (email, password, user_agent = "") => {
+				return this.post(url + "/login/", { email, password, user_agent });
 			}
 		};
 	}
 	syllabus() {
-		let url = this.options.assetsPath + "/syllabus";
+		let url = this.options.apiPath + "/v1/coursework/course";
+		const academy = this.options.sessionAcademy();
 		return {
 			get: (slug, version = "1") => {
 				if (!slug) throw new Error("Missing slug");
-				else return this.get(url + "/" + slug + "?v=" + version);
-			},
-			getInstructions: (slug = null, dayNumber = null, version = "1") => {
-				if (!slug) throw new Error("Missing slug");
-				if (!dayNumber) throw new Error("Missing slug");
-				else return this.get(url + `/${slug}/day/${dayNumber}/instructions?v=${version}`, null, false);
+				else return this.get(`${url}/${slug}/academy/${academy}/syllabus/${version}`);
 			}
 		};
 	}
 	todo() {
-		let url = this.options.apiPath;
+		let url = this.options.apiPath + "/v1/assignment";
 		return {
 			getByStudent: id => {
-				return this.get(url + "/student/" + id + "/task/");
+				return this.get(url + "/user/me/task");
 			},
 			add: (id, args) => {
-				return this.post(url + "/student/" + id + "/task/", args);
+				return this.post(url + "/user/" + id + "/task", args);
 			},
-			update: args => {
-				return this.post(url + "/task/" + args.id, args);
+			delete: args => {
+				// return this.delete(`${url}/user/${user_id}/task/${args.id}`, args);
+			},
+			update: (user_id, args) => {
+				return this.put(`${url}/task/${args.id}`, args);
 			}
 		};
 	}
@@ -221,16 +217,16 @@ class Wrapper {
 		};
 	}
 	user() {
-		let url = this.options.apiPath;
+		let url = this.options.apiPath + "/v1/auth";
 		return {
 			all: () => {
-				return this.get(url + "/user/");
+				return this.get(url + "/user");
 			},
 			add: args => {
-				return this.put(url + "/user/", args);
+				return this.post(url + "/user/", args);
 			},
 			update: (id, args) => {
-				return this.post(url + "/user/" + id, args);
+				return this.put(url + "/user/" + id, args);
 			},
 			delete: id => {
 				return this.delete(url + "/user/" + id);
@@ -276,23 +272,16 @@ class Wrapper {
 			}
 		};
 	}
-	message() {
-		//let url = this.options.apiPath;
-		let assetsURL = this.options.assetsPath;
+	admissions() {
+		let url = this.options.apiPath + "/v1/admissions";
 		return {
-			getByStudent: (student_id, args = []) => {
-				return this.get(assetsURL + "/message/student/" + student_id, args);
-			},
-			templates: () => {
-				return this.get(assetsURL + "/message/templates");
-			},
-			markAs: (messageId, status) => {
-				return this.post(assetsURL + "/message/" + messageId + "/" + status);
+			me: token => {
+				return this.get(url + "/user/me", { token });
 			}
 		};
 	}
 	cohort() {
-		let url = this.options.apiPath;
+		let url = this.options.apiPath + "/v1/admissions/academy/cohort";
 		return {
 			all: () => {
 				return this.get(url + "/cohorts/");
@@ -306,22 +295,17 @@ class Wrapper {
 			update: (id, args) => {
 				return this.post(url + "/cohort/" + id, args);
 			},
-			updateCurrentDay: (id, currenyDay) => {
-				return this.post(url + "/cohort/" + id + "/current_day", {
-					current_day: currenyDay
-				});
-			},
 			delete: id => {
 				return this.delete(url + "/cohort/" + id);
-			},
-			getStudents: id => {
-				return this.get(url + "/students/cohort/" + id);
 			},
 			addStudents: (cohortId, studentsArray) => {
 				studentsArray = studentsArray.map(id => {
 					return { student_id: id };
 				});
 				return this.post(url + "/student/cohort/" + cohortId, studentsArray);
+			},
+			getStudents: cohortId => {
+				return this.get(url + "/user?cohorts=" + cohortId);
 			},
 			removeStudents: (cohortId, studentsArray) => {
 				studentsArray = studentsArray.map(id => {
@@ -382,14 +366,6 @@ class Wrapper {
 			}
 		};
 	}
-	replit() {
-		let url = this.options.assetsPath;
-		return {
-			byCohort: slug => {
-				return this.get(url + "/replit/cohort/" + slug);
-			}
-		};
-	}
 	catalog() {
 		let url = this.options.apiPath;
 		return {
@@ -414,23 +390,6 @@ class Wrapper {
 			}
 		};
 	}
-	activity() {
-		let url = this.options.assetsPath;
-		return {
-			all: user => {
-				return this.get(url + "/activity/user");
-			},
-			get: id => {
-				return this.get(url + "/activity/user/" + id);
-			},
-			add: (id, args) => {
-				return this.post(url + "/activity/user/" + id, args);
-			},
-			addBulk: activities => {
-				return this.post(url + "/activity/user/bulk", activities);
-			}
-		};
-	}
 	streaming() {
 		let url = this.options.assetsPath;
 		return {
@@ -439,6 +398,16 @@ class Wrapper {
 			}
 		};
 	}
+	activity() {
+		let url = this.options.assetsPath;
+		return {
+			addStudentActivity: (id, { user_agent, cohort, day, slug, data }) => {
+				return this.post(url + "/activity/user/" + id, { user_agent, cohort, day, slug, data });
+			},
+			addBulk: activities => {
+				return this.post(url + "/activity/user/bulk", activities);
+			}
+		};
+	}
 }
-if (typeof module != "undefined") module.exports = new Wrapper();
-window.BC = new Wrapper();
+export default new Wrapper();

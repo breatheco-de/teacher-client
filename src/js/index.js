@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 //include your index.scss file into the bundle
 import "@breathecode/ui-components/dist/main.css";
 import "../styles/index.scss";
-
+import { autoLogin } from "./actions";
 //import your own components
 import Layout from "./layout";
 
@@ -20,5 +20,19 @@ const tagManagerArgs = {
 
 TagManager.initialize(tagManagerArgs);
 
-//render your react application
-ReactDOM.render(<Layout />, document.querySelector("#app"));
+const app = document.querySelector("#app");
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get("token");
+
+//if token comes in the URL we have to login with that token;
+console.log("token", token);
+if (token && typeof token != "undefined" && token != "")
+	autoLogin(token)
+		.then(() => {
+			ReactDOM.render(<Layout />, app);
+		})
+		.catch(() => {
+			ReactDOM.render(<div className="alert alert-danger text-center">Invalid Credentials</div>, app);
+		});
+//else normal rendering
+else ReactDOM.render(<Layout />, app);

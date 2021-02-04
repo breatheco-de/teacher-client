@@ -1,6 +1,7 @@
 import React from "react";
 import { login, remind } from "../actions.js";
-import { Login, Forgot } from "@breathecode/ui-components";
+import { Forgot } from "@breathecode/ui-components";
+import Login from "../components/Login";
 
 export const LoginView = propers => (
 	<Login

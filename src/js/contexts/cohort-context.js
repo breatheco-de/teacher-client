@@ -8,6 +8,7 @@ export const CohortContext = React.createContext(null);
 const getState = ({ getStore, setStore }) => {
 	return {
 		store: {
+			error: null,
 			syllabus: [],
 			students: [],
 			replits: null
@@ -20,16 +21,16 @@ const getState = ({ getStore, setStore }) => {
 				else
 					BC.activity()
 						.addBulk(
-							students.map(stud => {
-								const attended = attendancy.find(a => a.id === stud.id);
+							students.map(({ user }) => {
+								const attended = attendancy.find(a => a.id === user.id);
 								return {
-									id: stud.id,
-									email: stud.email,
+									id: user.id,
+									email: user.email,
 									user_agent: "bc/teacher",
 									cohort: cohortSlug,
-									day: currentCohort.current_day.toString(),
+									day: currentCohort.cohort.current_day.toString(),
 									slug: typeof attended === "undefined" || !attended ? "classroom_unattendance" : "classroom_attendance",
-									data: `{ "cohort": "${cohortSlug}", "day": "${currentCohort.current_day}"}`
+									data: `{ "cohort": "${cohortSlug}", "day": "${currentCohort.cohort.current_day}"}`
 								};
 							})
 						)
@@ -55,14 +56,12 @@ const Store = PassedComponent => {
 
 		componentDidMount() {
 			const { currentCohort } = Session.getPayload();
-			const full_slug =
-				currentCohort.syllabus_slug && typeof currentCohort.syllabus_slug !== "undefined" && currentCohort.syllabus_slug !== ""
-					? currentCohort.syllabus_slug
-					: currentCohort.profile_slug;
+			const full_slug = currentCohort.cohort.certificate.slug;
 			const [syllabus, version] = full_slug.split(".");
 			BC.syllabus()
 				.get(syllabus, version)
-				.then(data => {
+				.then(_d => {
+					const data = _d.json;
 					let dayNumber = 1;
 
 					if (Array.isArray(data.weeks)) data.days = [].concat.apply([], data.weeks.map(week => week.days));
@@ -88,15 +87,20 @@ const Store = PassedComponent => {
 				});
 
 			BC.cohort()
-				.getStudents(currentCohort.slug)
+				.getStudents(currentCohort.cohort.slug)
 				.then(resp => {
 					this.setState({
-						store: Object.assign(this.state.store, { students: resp.data })
+						store: Object.assign(this.state.store, { students: resp })
 					});
 				})
 				.catch(data => {
 					if (typeof data.pending === "undefined") console.error(data);
-					else console.warn(data.msg);
+					else {
+						console.warn(data.msg);
+						this.setState({
+							store: Object.assign(this.state.store, { error: data })
+						});
+					}
 				});
 		}
 
