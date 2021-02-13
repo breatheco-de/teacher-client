@@ -73,7 +73,11 @@ const Store = PassedComponent => {
 							else {
 								d.dayNumber = dayNumber + (d.partial || "");
 								dayNumber++;
-							}
+                            }
+                            if (!d.label.includes("Day")) {
+                                d.technologies = [d.label];
+                                d.label = "Day " + d.dayNumber;
+                            }
 						}
 						return d;
 					});
