@@ -43,7 +43,7 @@ export const ChooseCohort = properties => {
 								}}>
 								<i className="fas fa-external-link-alt" /> launch this course
 							</button>
-							<span className="cohort-name h4">{c.cohort.certificate.name}</span>
+							<span className="cohort-name h4">{c.cohort.syllabus.certificate.name}</span>
 							<p className="cohort-description m-0">Cohort: {c.cohort.name}</p>
 						</li>
 					))}
@@ -383,7 +383,7 @@ export class CohortView extends React.Component {
 									path={this.props.match.path + "/attendance/history"}
 									render={() => (
 										<IFrameView
-											src={`https://attendancy.breatheco.de/?cohort_slug=${
+											src={`https://attendance.breatheco.de/?cohort_slug=${
 												currentCohort.cohort.slug
 											}&teacher=${bc_id}&token=${token}`}
 										/>

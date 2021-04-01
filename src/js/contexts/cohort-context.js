@@ -56,10 +56,9 @@ const Store = PassedComponent => {
 
 		componentDidMount() {
 			const { currentCohort } = Session.getPayload();
-			const full_slug = currentCohort.cohort.certificate.slug;
-			const [syllabus, version] = full_slug.split(".");
+			const syllabus = currentCohort.cohort.syllabus.certificate.slug;
 			BC.syllabus()
-				.get(syllabus, version)
+				.get(syllabus, currentCohort.cohort.syllabus.version)
 				.then(_d => {
 					const data = _d.json;
 					let dayNumber = 1;
@@ -73,11 +72,11 @@ const Store = PassedComponent => {
 							else {
 								d.dayNumber = dayNumber + (d.partial || "");
 								dayNumber++;
-                            }
-                            if (!d.label.includes("Day")) {
-                                d.technologies = [d.label];
-                                d.label = "Day " + d.dayNumber;
-                            }
+							}
+							if (!d.label.includes("Day")) {
+								d.technologies = [d.label];
+								d.label = "Day " + d.dayNumber;
+							}
 						}
 						return d;
 					});

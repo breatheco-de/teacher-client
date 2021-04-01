@@ -182,7 +182,7 @@ class Wrapper {
 		};
 	}
 	syllabus() {
-		let url = this.options.apiPath + "/v1/coursework/course";
+		let url = this.options.apiPath + "/v1/admissions/certificate";
 		const academy = this.options.sessionAcademy();
 		return {
 			get: (slug, version = "1") => {
