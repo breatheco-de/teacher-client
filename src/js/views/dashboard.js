@@ -148,7 +148,7 @@ class AttendancyView extends React.Component {
 									<div
 										className="input-group-append d-inline-block"
 										onClick={() =>
-											updateCohortDay(this.state.currentCohort.cohort.id, this.state.currentDay).then(() =>
+											updateCohortDay(this.state.currentCohort, this.state.currentDay).then(() =>
 												this.setState({ currentDay: this.state.currentDay, changeDay: false })
 											)
 										}>

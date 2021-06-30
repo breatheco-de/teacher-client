@@ -56,7 +56,9 @@ const Store = PassedComponent => {
 
 		componentDidMount() {
 			const { currentCohort } = Session.getPayload();
-			const syllabus = currentCohort.cohort.syllabus.certificate.slug;
+			const syllabus = currentCohort.cohort.syllabus.certificate
+				? currentCohort.cohort.syllabus.certificate.slug
+				: currentCohort.cohort.syllabus;
 			BC.syllabus()
 				.get(syllabus, currentCohort.cohort.syllabus.version)
 				.then(_d => {

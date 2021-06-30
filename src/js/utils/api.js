@@ -281,7 +281,7 @@ class Wrapper {
 		};
 	}
 	cohort() {
-		let url = this.options.apiPath + "/v1/admissions/academy/cohort";
+		let url = this.options.apiPath + "/v1/admissions/academy";
 		return {
 			all: () => {
 				return this.get(url + "/cohorts/");
@@ -290,10 +290,10 @@ class Wrapper {
 				return this.get(url + "/cohort/" + id);
 			},
 			add: args => {
-				return this.put(url + "/cohort/", args);
+				return this.post(url + "/cohort/", args);
 			},
 			update: (id, args) => {
-				return this.post(url + "/cohort/" + id, args);
+				return this.put(url + "/cohort/" + id, args);
 			},
 			delete: id => {
 				return this.delete(url + "/cohort/" + id);
@@ -305,7 +305,7 @@ class Wrapper {
 				return this.post(url + "/student/cohort/" + cohortId, studentsArray);
 			},
 			getStudents: cohortId => {
-				return this.get(url + "/user?cohorts=" + cohortId);
+				return this.get(url + "/cohort/user?cohorts=" + cohortId);
 			},
 			removeStudents: (cohortId, studentsArray) => {
 				studentsArray = studentsArray.map(id => {
