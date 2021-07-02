@@ -21,11 +21,12 @@ const getState = ({ getStore, setStore }) => {
 				else
 					BC.activity()
 						.addBulk(
+							cohortSlug,
 							students.map(({ user }) => {
-								const attended = attendancy.find(a => a.id === user.id);
+								const attended = attendancy.find(a => a.user.id === user.id);
+								console.log("attendancy", user, attended, attendancy);
 								return {
-									id: user.id,
-									email: user.email,
+									user_id: user.id,
 									user_agent: "bc/teacher",
 									cohort: cohortSlug,
 									day: currentCohort.cohort.current_day.toString(),
@@ -95,7 +96,7 @@ const Store = PassedComponent => {
 				.getStudents(currentCohort.cohort.slug)
 				.then(resp => {
 					this.setState({
-						store: Object.assign(this.state.store, { students: resp })
+						store: Object.assign(this.state.store, { students: resp.filter(u => u.role === "STUDENT") })
 					});
 				})
 				.catch(data => {

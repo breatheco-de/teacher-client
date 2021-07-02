@@ -305,7 +305,7 @@ class Wrapper {
 				return this.post(url + "/student/cohort/" + cohortId, studentsArray);
 			},
 			getStudents: cohortId => {
-				return this.get(url + "/cohort/user?cohorts=" + cohortId);
+				return this.get(url + "/cohort/user?role=STUDENT&cohorts=" + cohortId);
 			},
 			removeStudents: (cohortId, studentsArray) => {
 				studentsArray = studentsArray.map(id => {
@@ -399,13 +399,10 @@ class Wrapper {
 		};
 	}
 	activity() {
-		let url = this.options.assetsPath;
+		let url = this.options.apiPath + `/v1/activity`;
 		return {
-			addStudentActivity: (id, { user_agent, cohort, day, slug, data }) => {
-				return this.post(url + "/activity/user/" + id, { user_agent, cohort, day, slug, data });
-			},
-			addBulk: activities => {
-				return this.post(url + "/activity/user/bulk", activities);
+			addBulk: (cohort_id, activities) => {
+				return this.post(url + "/cohort/" + cohort_id, activities);
 			}
 		};
 	}
