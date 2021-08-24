@@ -63,7 +63,7 @@ const Store = PassedComponent => {
 			BC.syllabus()
 				.get(syllabus, currentCohort.cohort.syllabus.version)
 				.then(_d => {
-					const data = typeof _d.json === "string" ? JSON.parse(_d.json) : _d;
+					const data = typeof _d.json === "string" ? JSON.parse(_d.json) : _d.json;
 					let dayNumber = 1;
 
 					if (Array.isArray(data.weeks)) data.days = [].concat.apply([], data.weeks.map(week => week.days));
