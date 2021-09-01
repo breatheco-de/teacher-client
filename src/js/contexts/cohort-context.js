@@ -57,11 +57,11 @@ const Store = PassedComponent => {
 
 		componentDidMount() {
 			const { currentCohort } = Session.getPayload();
-			const syllabus = currentCohort.cohort.syllabus.certificate
-				? currentCohort.cohort.syllabus.certificate.slug
-				: currentCohort.cohort.syllabus;
+			const syllabus = currentCohort.cohort.syllabus_version
+				? currentCohort.cohort.syllabus_version.syllabus
+				: currentCohort.cohort.syllabus_version;
 			BC.syllabus()
-				.get(syllabus, currentCohort.cohort.syllabus.version)
+				.get(syllabus, currentCohort.cohort.syllabus_version.version)
 				.then(_d => {
 					const data = typeof _d.json === "string" ? JSON.parse(_d.json) : _d.json;
 					let dayNumber = 1;

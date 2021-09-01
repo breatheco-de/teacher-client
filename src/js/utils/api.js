@@ -182,12 +182,12 @@ class Wrapper {
 		};
 	}
 	syllabus() {
-		let url = this.options.apiPath + "/v1/admissions/certificate";
+		let url = this.options.apiPath + "/v1/admissions";
 		const academy = this.options.sessionAcademy();
 		return {
-			get: (slug, version = "1") => {
-				if (!slug) throw new Error("Missing slug");
-				else return this.get(`${url}/${slug}/academy/${academy}/syllabus/${version}`);
+			get: (pk, version = "1") => {
+				if (!pk) throw new Error("Missing slug");
+				else return this.get(`${url}/academy/${academy}/syllabus/${pk}/version/${version}`);
 			}
 		};
 	}
