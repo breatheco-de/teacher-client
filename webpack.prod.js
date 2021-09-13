@@ -6,7 +6,7 @@ const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-console.log('ENVIRONMENT', process.env)
+console.log('ENVIRONMENT', process.env);
 
 module.exports = merge(common, {
     mode: 'development',
