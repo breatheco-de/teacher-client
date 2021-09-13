@@ -5,7 +5,8 @@ var PrettierPlugin = require("prettier-webpack-plugin");
 const Dotenv = require('dotenv-webpack');
 
 module.exports = merge(common, {
-  devtool: "source-map",
+  mode: 'development',
+  devtool: "eval",
   devServer: {
     contentBase:  './dist',
     hot: true,
@@ -24,6 +25,11 @@ module.exports = merge(common, {
       jsxBracketSameLine: true,
       semi: true,                 // Print semicolons at the ends of statements.
       encoding: 'utf-8'           // Which encoding scheme to use on files
+    }),
+    new Dotenv({
+      path: './.env',
+      safe: true,
+      systemvars: true
     })
   ]
 });

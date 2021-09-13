@@ -9,12 +9,16 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 console.log('ENVIRONMENT', process.env);
 
 module.exports = merge(common, {
-    mode: 'development',
+    mode: 'production',
     devtool: "source-map",
     output: {
         filename: '[hash].bundle.js',
         path: path.resolve(__dirname, 'public'),
         publicPath: path.resolve(__dirname, '/')
     },
-    plugins: []
-})
+    plugins: [
+        new Dotenv({
+            systemvars: true
+        })
+    ]
+});
