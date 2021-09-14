@@ -1,4 +1,4 @@
-# WebApp boilerplate with React and Cloud 9
+# WebApp boilerplate
 
 Requirements: Make sure you are using node version 8
 * `$ node -v` to check which node version you are using
