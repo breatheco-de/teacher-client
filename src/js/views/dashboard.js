@@ -43,7 +43,7 @@ export const ChooseCohort = properties => {
 								}}>
 								<i className="fas fa-external-link-alt" /> launch this course
 							</button>
-							<span className="cohort-name h4">{c.cohort.syllabus.certificate.name}</span>
+							<span className="cohort-name h4">{c.cohort.syllabus_version.name}</span>
 							<p className="cohort-description m-0">Cohort: {c.cohort.name}</p>
 						</li>
 					))}
