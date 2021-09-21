@@ -1,4 +1,4 @@
-# WebApp boilerplate
+# WebApp boilerplatee
 
 Requirements: Make sure you are using node version 8
 * `$ node -v` to check which node version you are using
