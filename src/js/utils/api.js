@@ -402,7 +402,7 @@ class Wrapper {
 		let url = this.options.apiPath + `/v1/activity`;
 		return {
 			addBulk: (cohort_id, activities) => {
-				return this.post(url + "/cohort/" + cohort_id, activities);
+				return this.post(url + "/academy/cohort/" + cohort_id, activities);
 			}
 		};
 	}
