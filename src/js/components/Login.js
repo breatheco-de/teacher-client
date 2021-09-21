@@ -2,6 +2,8 @@ import React from "react";
 import Validator from "validator";
 import PropTypes from "prop-types";
 
+const apiPath = (process.env.API_URL || "").replace(/\/$/, "");
+
 class Login extends React.Component {
 	constructor() {
 		super();
@@ -90,7 +92,7 @@ class Login extends React.Component {
 									<a
 										rel="noopener noreferrer"
 										target="_blank"
-										href={`https://breathecode.herokuapp.com/v1/auth/password/reset?url=${window.location.href}`}>
+										href={`${apiPath}/v1/auth/password/reset?url=${window.location.href}`}>
 										Forgot Password
 									</a>{" "}
 									or{" "}
@@ -102,9 +104,7 @@ class Login extends React.Component {
 						</form>
 					) : (
 						<div>
-							<a
-								href={`https://breathecode.herokuapp.com/v1/auth/github?url=${window.location.href}`}
-								className="btn btn-lg btn-light btn-block">
+							<a href={`${apiPath}/v1/auth/github?url=${window.location.href}`} className="btn btn-lg btn-light btn-block">
 								<i className="fab fa-github mr-2" />
 								With Github
 							</a>

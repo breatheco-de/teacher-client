@@ -43,7 +43,7 @@ export const ChooseCohort = properties => {
 								}}>
 								<i className="fas fa-external-link-alt" /> launch this course
 							</button>
-							<span className="cohort-name h4">{c.cohort.syllabus.certificate.name}</span>
+							<span className="cohort-name h4">{c.cohort.syllabus_version.name}</span>
 							<p className="cohort-description m-0">Cohort: {c.cohort.name}</p>
 						</li>
 					))}
@@ -181,7 +181,9 @@ class AttendancyView extends React.Component {
 								return (
 									<li key={i}>
 										<CheckBox
-											label={`${s.user.first_name} ${s.user.last_name ? s.user.last_name : ""}`}
+											label={`${s.profile_academy.first_name} ${
+												s.profile_academy.last_name ? s.profile_academy.last_name : ""
+											}`}
 											checked={checked}
 											onClick={isCheck => this.setState({ rsvp: isCheck ? rsvp.concat(s) : rsvp })}
 										/>
