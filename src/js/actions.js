@@ -97,12 +97,15 @@ export const fetchInstructions = (slug, dayNumber, version = "1") => {
 		});
 };
 
-export const updateCohortDay = (currentCohort, currenyDay) => {
-	return BC.cohort()
-		.update(currentCohort.cohort.id, { current_day: currenyDay })
-		.then(data => {
-			Session.setPayload({ currentCohort: { ...currentCohort, cohort: data.data || data } });
-			Notify.success("The cohort current day was update successfully");
-			return data;
-		});
+export const updateCohortDay = (currentCohort, currentDay) => {
+	return new Promise((resolve, reject) => {
+		BC.cohort()
+			.update(currentCohort.cohort.id, { current_day: currentDay })
+			.then(data => {
+				Session.setPayload({ currentCohort: { ...currentCohort, cohort: data.data || data } });
+				resolve(data);
+				return data;
+			})
+			.catch(error => reject(error));
+	});
 };

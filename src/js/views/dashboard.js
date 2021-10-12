@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { Redirect, Switch, Route, withRouter, Link } from "react-router";
 import { PropTypes } from "prop-types";
 import BC from "../utils/api.js";
@@ -113,13 +113,81 @@ CheckBox.propTypes = {
 	onClick: PropTypes.func.isRequired,
 	label: PropTypes.string
 };
+
+class CurrentDayModal extends React.Component {
+	constructor() {
+		super();
+		this.state = { class: "danger", message: null, loading: false };
+	}
+	render() {
+		const { currentDay, onChange, onSubmit, maxCurrentDay, currentCohort } = this.props;
+		return (
+			<div className="modal show d-block" role="dialog">
+				<div className="modal-dialog" role="document">
+					<div className="modal-content">
+						<div className="modal-header">
+							<h5 className="modal-title">Please confirm the new cohort day</h5>
+							<button type="button" className="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div className="modal-body">
+							{this.state.message && <div className={"alert alert-" + this.state.class}>{this.state.message}</div>}
+							<input
+								type="number"
+								style={{ minWidth: "60px" }}
+								min={1}
+								max={maxCurrentDay}
+								className="form-control d-inline-block"
+								value={currentDay}
+								onChange={e => onChange(e.target.value)}
+							/>
+						</div>
+						<div className="modal-footer">
+							<button
+								type="button"
+								disabled={this.state.loading}
+								onClick={() => {
+									this.setState({ class: "secondary", message: "Updating cohort day...", loading: true });
+									updateCohortDay(currentCohort, currentDay)
+										.then(data => {
+											this.setState({ class: "secondary", message: "Reporting attendancy...", loading: true });
+											this.props
+												.getAttendance(currentCohort.cohort.slug, currentDay)
+												.then(activities => onSubmit(true))
+												.catch(error => this.setState({ class: "danger", message: error.message, loading: false }));
+										})
+										.catch(error => this.setState({ class: "danger", message: error.message, loading: false }));
+								}}
+								className="btn btn-primary">
+								{this.state.loading ? "Loading..." : "Confirm"}
+							</button>
+							<button type="button" onClick={() => onSubmit(false)} className="btn btn-secondary" data-dismiss="modal">
+								Close
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+}
+CurrentDayModal.propTypes = {
+	currentDay: PropTypes.number.isRequired,
+	maxCurrentDay: PropTypes.number.isRequired,
+	onChange: PropTypes.func.isRequired,
+	getAttendance: PropTypes.func.isRequired,
+	currentCohort: PropTypes.object.isRequired,
+	onSubmit: PropTypes.func.isRequired
+};
+
 class AttendancyView extends React.Component {
 	constructor() {
 		super();
 		this.state = {
 			rsvp: [],
-			changeDay: false,
 			currentDay: 1,
+			dayDialogOpened: false,
 			currentCohort: null
 		};
 	}
@@ -130,76 +198,66 @@ class AttendancyView extends React.Component {
 	render() {
 		if (!this.state.currentCohort) return <Loading show={true} />;
 		return (
-			<CohortContext.Consumer>
-				{({ store, actions }) => (
-					<div className="m-0">
-						<h1>
-							Attendance for day:
-							{this.state.changeDay ? (
-								<div className="input-group mb-3 d-inline-block" style={{ width: "200px" }}>
-									<input
-										type="number"
-										style={{ minWidth: "60px" }}
-										min={0}
-										className="form-control d-inline-block"
-										value={this.state.currentDay}
-										onChange={e => this.setState({ currentDay: e.target.value })}
-									/>
-									<div
-										className="input-group-append d-inline-block"
-										onClick={() =>
-											updateCohortDay(this.state.currentCohort, this.state.currentDay).then(() =>
-												this.setState({ currentDay: this.state.currentDay, changeDay: false })
-											)
-										}>
-										<span className="input-group-text bg-success">
-											<i className="fas fa-check" />
-										</span>
-									</div>
-									<div className="input-group-append d-inline-block" onClick={() => this.setState({ changeDay: false })}>
-										<span className="input-group-text">
-											<i className="fas fa-times" />
-										</span>
-									</div>
-								</div>
-							) : (
-								<span className="badge badge-light editable" onClick={() => this.setState({ changeDay: true })}>
-									{this.state.currentDay} <i className="fas fa-pencil-alt" />
+			<Fragment>
+				<CohortContext.Consumer>
+					{({ store, actions }) => (
+						<div className="m-0">
+							<h1>
+								Attendance for day:
+								<span className="badge badge-light editable" onClick={() => this.setState({ dayDialogOpened: true })}>
+									{this.state.currentDay}
 								</span>
+							</h1>
+							<span
+								className="a text-primary pointer"
+								onClick={() => this.props.history.push(`/cohort/${this.state.currentCohort.cohort.slug}/attendance/history`)}>
+								Review previous attendancy
+							</span>
+							<ul className="m-5 p-0">
+								{store.students.map((s, i) => {
+									console.log(this.state.rsvp);
+									const checked = this.state.rsvp.find(std => std.user.id === s.user.id) || false;
+									const rsvp = this.state.rsvp.filter(sdt => sdt.user.id != s.user.id);
+									return (
+										<li key={i}>
+											<CheckBox
+												label={`${s.profile_academy.first_name} ${
+													s.profile_academy.last_name ? s.profile_academy.last_name : ""
+												}`}
+												checked={checked}
+												onClick={isCheck => this.setState({ rsvp: isCheck ? rsvp.concat(s) : rsvp })}
+											/>
+										</li>
+									);
+								})}
+							</ul>
+							<Button
+								type="primary"
+								className="w-100 mt-4"
+								label="Send Attendancy Report"
+								onClick={() => this.setState({ dayDialogOpened: true })}
+							/>
+							{this.state.dayDialogOpened && (
+								<CurrentDayModal
+									currentDay={this.state.currentDay}
+									maxCurrentDay={store.duration_in_days}
+									currentCohort={this.state.currentCohort}
+									minCurrentDay={this.state.currentDay}
+									getAttendance={actions.getAttendance}
+									onChange={day => this.setState({ currentDay: day })}
+									onSubmit={valid =>
+										!valid
+											? this.setState({ dayDialogOpened: false })
+											: actions
+													.saveCohortAttendancy(this.state.currentCohort.cohort.slug, this.state.rsvp)
+													.then(() => this.setState({ dayDialogOpened: false }))
+									}
+								/>
 							)}
-						</h1>
-						<span
-							className="a text-primary pointer"
-							onClick={() => this.props.history.push(`/cohort/${this.state.currentCohort.cohort.slug}/attendance/history`)}>
-							Review previous attendancy
-						</span>
-						<ul className="m-5 p-0">
-							{store.students.map((s, i) => {
-								console.log(this.state.rsvp);
-								const checked = this.state.rsvp.find(std => std.user.id === s.user.id) || false;
-								const rsvp = this.state.rsvp.filter(sdt => sdt.user.id != s.user.id);
-								return (
-									<li key={i}>
-										<CheckBox
-											label={`${s.profile_academy.first_name} ${
-												s.profile_academy.last_name ? s.profile_academy.last_name : ""
-											}`}
-											checked={checked}
-											onClick={isCheck => this.setState({ rsvp: isCheck ? rsvp.concat(s) : rsvp })}
-										/>
-									</li>
-								);
-							})}
-						</ul>
-						<Button
-							type="primary"
-							className="w-100 mt-4"
-							label="Send Attendancy Report"
-							onClick={() => actions.saveCohortAttendancy(this.state.currentCohort.cohort.slug, this.state.rsvp)}
-						/>
-					</div>
-				)}
-			</CohortContext.Consumer>
+						</div>
+					)}
+				</CohortContext.Consumer>
+			</Fragment>
 		);
 	}
 }

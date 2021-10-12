@@ -403,6 +403,10 @@ class Wrapper {
 		return {
 			addBulk: (cohort_id, activities) => {
 				return this.post(url + "/academy/cohort/" + cohort_id, activities);
+			},
+			getAttendance: cohort_id => {
+				//https://breathecode.herokuapp.com/v1/activity/cohort/miami-downtown-xvii?slug=classroom_attendance,classroom_unattendance
+				return this.get(url + "/cohort/" + cohort_id + "?slug=classroom_attendance,classroom_unattendance");
 			}
 		};
 	}

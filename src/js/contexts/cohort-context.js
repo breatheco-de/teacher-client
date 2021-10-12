@@ -9,6 +9,7 @@ const getState = ({ getStore, setStore }) => {
 	return {
 		store: {
 			error: null,
+			duration_in_days: 0,
 			syllabus: [],
 			students: [],
 			replits: null
@@ -17,26 +18,48 @@ const getState = ({ getStore, setStore }) => {
 			saveCohortAttendancy: (cohortSlug, attendancy) => {
 				const { students } = getStore();
 				const { currentCohort } = Session.getPayload();
-				if (attendancy.length == 0) Notify.error("No attendancy to report");
-				else
-					BC.activity()
-						.addBulk(
-							cohortSlug,
-							students.map(({ user }) => {
-								const attended = attendancy.find(a => a.user.id === user.id);
-								console.log("attendancy", user, attended, attendancy);
-								return {
-									user_id: user.id,
-									user_agent: "bc/teacher",
-									cohort: cohortSlug,
-									day: currentCohort.cohort.current_day.toString(),
-									slug: typeof attended === "undefined" || !attended ? "classroom_unattendance" : "classroom_attendance",
-									data: `{ "cohort": "${cohortSlug}", "day": "${currentCohort.cohort.current_day}"}`
-								};
+				return new Promise((resolve, reject) => {
+					if (attendancy.length == 0) {
+						reject(new Error("No attendancy to report"));
+						Notify.error("No attendancy to report");
+					} else
+						BC.activity()
+							.addBulk(
+								cohortSlug,
+								students.map(({ user }) => {
+									const attended = attendancy.find(a => a.user.id === user.id);
+									return {
+										user_id: user.id,
+										user_agent: "bc/teacher",
+										cohort: cohortSlug,
+										day: currentCohort.cohort.current_day.toString(),
+										slug: typeof attended === "undefined" || !attended ? "classroom_unattendance" : "classroom_attendance",
+										data: `{ "cohort": "${cohortSlug}", "day": "${currentCohort.cohort.current_day}"}`
+									};
+								})
+							)
+							.then(resp => {
+								Notify.success("The Attendancy has been reported");
+								resolve(true);
 							})
-						)
-						.then(resp => Notify.success("The Attendancy has been reported"))
-						.catch(err => Notify.error("There was an error reporting the attendancy"));
+							.catch(err => {
+								Notify.error("There was an error reporting the attendancy");
+								reject(new Error("There was an error reporting the attendancy"));
+							});
+				});
+			},
+			getAttendance: (cohortSlug, day) => {
+				console.log("Get attendance");
+				return new Promise((resolve, reject) =>
+					BC.activity()
+						.getAttendance(cohortSlug)
+						.then(activities => {
+							const activitiesForDay = activities.filter(act => act.day == day);
+							if (activitiesForDay.length === 0) resolve(activitiesForDay);
+							else reject(new Error("Attendancy was already reported for day " + day));
+						})
+						.catch(err => reject(new Error("Could not fetch previous attendancy for validation purposes")))
+				);
 			}
 		}
 	};
@@ -53,6 +76,7 @@ const Store = PassedComponent => {
 						store: Object.assign(this.state.store, updatedStore)
 					})
 			});
+			window.store = this.state.store;
 		}
 
 		componentDidMount() {
@@ -84,7 +108,7 @@ const Store = PassedComponent => {
 						return d;
 					});
 					this.setState({
-						store: Object.assign(this.state.store, { syllabus })
+						store: Object.assign(this.state.store, { syllabus, duration_in_days: _d.duration_in_days })
 					});
 				})
 				.catch(data => {
