@@ -204,7 +204,7 @@ class AttendancyView extends React.Component {
 						<div className="m-0">
 							<h1>
 								Attendance for day:
-								<span className="badge badge-light editable" onClick={() => this.setState({ dayDialogOpened: true })}>
+								<span className="badge badge-light editable">
 									{this.state.currentDay}
 								</span>
 							</h1>
