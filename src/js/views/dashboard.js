@@ -445,7 +445,7 @@ export class CohortView extends React.Component {
 										<IFrameView
 											src={`https://attendance.breatheco.de/?cohort_slug=${
 												currentCohort.cohort.slug
-											}&teacher=${bc_id}&token=${token}`}
+											}&teacher=${bc_id}&token=${token}&academy=${currentCohort.cohort.academy.id}`}
 										/>
 									)}
 								/>
