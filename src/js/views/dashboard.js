@@ -204,9 +204,7 @@ class AttendancyView extends React.Component {
 						<div className="m-0">
 							<h1>
 								Attendance for day:
-								<span className="badge badge-light editable">
-									{this.state.currentDay}
-								</span>
+								<span className="badge badge-light editable">{this.state.currentDay}</span>
 							</h1>
 							<span
 								className="a text-primary pointer"
@@ -221,9 +219,11 @@ class AttendancyView extends React.Component {
 									return (
 										<li key={i}>
 											<CheckBox
-												label={`${s.profile_academy.first_name} ${
-													s.profile_academy.last_name ? s.profile_academy.last_name : ""
-												}`}
+												label={
+													s.profile_academy
+														? `${s.profile_academy.first_name} ${s.profile_academy.last_name}`
+														: `${s.user.first_name} ${s.user.last_name} (this student has no profile at the academy)`
+												}
 												checked={checked}
 												onClick={isCheck => this.setState({ rsvp: isCheck ? rsvp.concat(s) : rsvp })}
 											/>
