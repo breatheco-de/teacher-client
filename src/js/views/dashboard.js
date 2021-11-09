@@ -458,7 +458,11 @@ export class CohortView extends React.Component {
 									exact
 									path={this.props.match.path + "/assignments"}
 									render={() => (
-										<IFrameView src={`https://assignments.breatheco.de/?cohort=${currentCohort.cohort.id}&token=${token}`} />
+										<IFrameView
+											src={`https://assignments.breatheco.de/?cohort=${currentCohort.cohort.id}&token=${token}&academy=${
+												currentCohort.cohort.academy.id
+											}`}
+										/>
 									)}
 								/>
 								<Route
